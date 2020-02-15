@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             Button button = new AppCompatButton(this);
             button.setText(NoteDB.getIndexes().get(i));
 
-
+            
 
             ll.addView(button);
         }
@@ -60,10 +60,6 @@ public class MainActivity extends AppCompatActivity {
         //or switch문을 이용하면 될듯 하다.
         if (id == R.id.action_write) {
             Toast.makeText(this, "메모 작성 클릭", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        if (id == R.id.action_camera) {
-            Toast.makeText(this, "촬영 시작", Toast.LENGTH_SHORT).show();
             return true;
         }
 

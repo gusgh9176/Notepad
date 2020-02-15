@@ -10,11 +10,6 @@
         android:title="@string/action_write"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_camera"
-        android:icon="@drawable/ic_action_camera"
-        android:title="@string/action_camera"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/action_setting"
         android:title="@string/action_settings"
         app:showAsAction="ifRoom" />
