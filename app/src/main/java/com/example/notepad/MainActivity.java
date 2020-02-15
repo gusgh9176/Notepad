@@ -38,7 +38,15 @@ public class MainActivity extends AppCompatActivity {
             Button button = new AppCompatButton(this);
             button.setText(NoteDB.getIndexes().get(i));
 
-            
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(view.getContext(), DetailActivity.class);
+                    String buttonText = (String) ((Button) view).getText();
+                    intent.putExtra("key", buttonText);
+                    startActivity(intent);
+                }
+            });
 
             ll.addView(button);
         }
