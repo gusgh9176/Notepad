@@ -3,4 +3,6 @@
     <string name="action_write">Write</string>
     <string name="action_camera">Camera</string>
     <string name="action_settings">설정</string>
+    <string name="action_edit">편집</string>
+    <string name="action_delete">삭제</string>
 </resources>
