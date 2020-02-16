@@ -2,18 +2,24 @@ package com.example.notepad;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.notepad.adapter.ListViewAdapter;
 import com.example.notepad.db.NoteDB;
+import com.example.notepad.listView.ListViewItem;
 import com.example.notepad.vo.NotepadVO;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,28 +35,40 @@ public class MainActivity extends AppCompatActivity {
         //액션바 배경색 변경
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
 
+        ListView listview ;
+        ListViewAdapter adapter;
+
+        // Adapter 생성
+        adapter = new ListViewAdapter() ;
+
+        // 리스트뷰 참조 및 Adapter달기
+        listview = (ListView) findViewById(R.id.listview1);
+        listview.setAdapter(adapter);
+
         prepareNoteDB();
-
-        LinearLayout ll = (LinearLayout) findViewById(R.id.itemList);
-
-        // 반복 시작
         for ( int i = 0; i < NoteDB.getIndexes().size(); i++ ) {
-            Button button = new AppCompatButton(this);
-            button.setText(NoteDB.getIndexes().get(i));
-
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(view.getContext(), DetailActivity.class);
-                    String buttonText = (String) ((Button) view).getText();
-                    intent.putExtra("key", buttonText);
-                    startActivity(intent);
-                }
-            });
-
-            ll.addView(button);
+            String index = NoteDB.getIndexes().get(i);
+            String description = NoteDB.getArticle(index).getDescription();
+            adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, description);
         }
-        // 반복 끝
+
+        // 위에서 생성한 listview에 클릭 이벤트 핸들러 정의.
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                // get item
+                ListViewItem item = (ListViewItem) parent.getItemAtPosition(position) ;
+
+                String titleStr = item.getTitle() ;
+                String descStr = item.getDesc() ;
+                Drawable iconDrawable = item.getIcon() ;
+
+                // TODO : use item data.
+                Intent intent = new Intent(v.getContext(), DetailActivity.class);
+                intent.putExtra("key", titleStr);
+                startActivity(intent);
+            }
+        }) ;
 
     }
 
