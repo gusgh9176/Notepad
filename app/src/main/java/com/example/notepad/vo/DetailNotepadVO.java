@@ -1,13 +1,13 @@
 package com.example.notepad.vo;
 
-public class NotepadVO {
+public class DetailNotepadVO {
     private int notepadNo;
-    private String subject;
+    private String titleStr;
     private String description;
 
-    public NotepadVO(int notepadNo, String subject, String description) {
+    public DetailNotepadVO(int notepadNo, String titleStr, String description) {
         this.notepadNo = notepadNo;
-        this.subject = subject;
+        this.titleStr = titleStr;
         this.description = description;
     }
 
@@ -19,12 +19,12 @@ public class NotepadVO {
         this.notepadNo = notepadNo;
     }
 
-    public String getSubject() {
-        return subject;
+    public String getTitleStr() {
+        return titleStr;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setTitleStr(String titleStr) {
+        this.titleStr = titleStr;
     }
 
     public String getDescription() {

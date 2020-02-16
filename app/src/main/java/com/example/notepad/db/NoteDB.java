@@ -1,6 +1,6 @@
 package com.example.notepad.db;
 
-import com.example.notepad.vo.NotepadVO;
+import com.example.notepad.vo.DetailNotepadVO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,13 +10,13 @@ import java.util.Map;
 
 public class NoteDB {
 
-    private static Map<String, NotepadVO> db = new HashMap<String, NotepadVO>();
+    private static Map<String, DetailNotepadVO> db = new HashMap<String, DetailNotepadVO>();
 
-    public static void addArticle(String index, NotepadVO NotepadVO){
-        db.put(index, NotepadVO);
+    public static void addArticle(String index, DetailNotepadVO DetailNotepadVO){
+        db.put(index, DetailNotepadVO);
     }
 
-    public static NotepadVO getArticle(String index){
+    public static DetailNotepadVO getArticle(String index){
         return db.get(index);
     }
 

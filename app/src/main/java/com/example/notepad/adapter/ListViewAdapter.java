@@ -10,13 +10,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.notepad.R;
-import com.example.notepad.listView.ListViewItem;
+import com.example.notepad.vo.ListViewNotepadVO;
 
 import java.util.ArrayList;
 
 public class ListViewAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
-    private ArrayList<ListViewItem> listViewItemList = new ArrayList<ListViewItem>() ;
+    private ArrayList<ListViewNotepadVO> listViewItemList = new ArrayList<ListViewNotepadVO>() ;
 
     // ListViewAdapter의 생성자
     public ListViewAdapter() {
@@ -47,12 +47,12 @@ public class ListViewAdapter extends BaseAdapter {
         TextView descTextView = (TextView) convertView.findViewById(R.id.textView2) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
-        ListViewItem listViewItem = listViewItemList.get(position);
+        ListViewNotepadVO listViewNotepadVO = listViewItemList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
-        iconImageView.setImageDrawable(listViewItem.getIcon());
-        titleTextView.setText(listViewItem.getTitle());
-        descTextView.setText(listViewItem.getDesc());
+        iconImageView.setImageDrawable(listViewNotepadVO.getIcon());
+        titleTextView.setText(listViewNotepadVO.getTitle());
+        descTextView.setText(listViewNotepadVO.getDesc());
 
         return convertView;
     }
@@ -71,7 +71,7 @@ public class ListViewAdapter extends BaseAdapter {
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
     public void addItem(Drawable icon, String title, String desc) {
-        ListViewItem item = new ListViewItem();
+        ListViewNotepadVO item = new ListViewNotepadVO();
 
         item.setIcon(icon);
         item.setTitle(title);

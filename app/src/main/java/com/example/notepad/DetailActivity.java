@@ -10,11 +10,11 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.notepad.db.NoteDB;
-import com.example.notepad.vo.NotepadVO;
+import com.example.notepad.vo.DetailNotepadVO;
 
 public class DetailActivity extends AppCompatActivity {
 
-    private TextView tvSubject;
+    private TextView tvTitle;
     private TextView tvNotepadNumber;
     private TextView tvDescription;
 
@@ -28,16 +28,16 @@ public class DetailActivity extends AppCompatActivity {
         //액션바 배경색 변경
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
 
-        tvSubject = (TextView) findViewById(R.id.tvSubject);
+        tvTitle = (TextView) findViewById(R.id.tvTitle);
         tvNotepadNumber = (TextView) findViewById(R.id.tvNotepadNumber);
         tvDescription = (TextView) findViewById(R.id.tvDescription);
 
         Intent intent = getIntent();
         String key = intent.getStringExtra("key");
 
-        NotepadVO articleVO = NoteDB.getArticle(key);
+        DetailNotepadVO articleVO = NoteDB.getArticle(key);
 
-        tvSubject.setText(articleVO.getSubject());
+        tvTitle.setText(articleVO.getTitleStr());
         tvNotepadNumber.setText(Integer.toString(articleVO.getNotepadNo()));
         tvDescription.setText(articleVO.getDescription());
     }

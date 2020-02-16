@@ -6,7 +6,7 @@
     tools:context=".DetailActivity">
 
     <TextView
-        android:id="@+id/tvSubject"
+        android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Large Text"
@@ -31,7 +31,7 @@
         android:id="@+id/image_scrollView"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_below="@+id/tvSubject">
+        android:layout_below="@+id/tvTitle">
 
         <LinearLayout
             android:orientation="horizontal"

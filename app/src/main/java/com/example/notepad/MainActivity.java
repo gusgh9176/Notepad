@@ -1,7 +1,6 @@
 package com.example.notepad;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
@@ -12,15 +11,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.notepad.adapter.ListViewAdapter;
 import com.example.notepad.db.NoteDB;
-import com.example.notepad.listView.ListViewItem;
-import com.example.notepad.vo.NotepadVO;
+import com.example.notepad.vo.ListViewNotepadVO;
+import com.example.notepad.vo.DetailNotepadVO;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         listview = (ListView) findViewById(R.id.listview1);
         listview.setAdapter(adapter);
 
-        prepareNoteDB();
+        prepareNoteDB(); // 임시 DB 생성
+
         for ( int i = 0; i < NoteDB.getIndexes().size(); i++ ) {
             String index = NoteDB.getIndexes().get(i);
             String description = NoteDB.getArticle(index).getDescription();
@@ -57,13 +55,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView parent, View v, int position, long id) {
                 // get item
-                ListViewItem item = (ListViewItem) parent.getItemAtPosition(position) ;
+                ListViewNotepadVO item = (ListViewNotepadVO) parent.getItemAtPosition(position) ;
 
                 String titleStr = item.getTitle() ;
                 String descStr = item.getDesc() ;
                 Drawable iconDrawable = item.getIcon() ;
 
                 // TODO : use item data.
+                // DetailActivity로 index 값 전달
                 Intent intent = new Intent(v.getContext(), DetailActivity.class);
                 intent.putExtra("key", titleStr);
                 startActivity(intent);
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void prepareNoteDB() {
         for ( int i = 1; i < 100; i++ ){
-            NoteDB.addArticle(i + "번 메모", new NotepadVO(i, i + "번 메모 제목", i + "번 메모 내용"));
+            NoteDB.addArticle(i + "번 메모", new DetailNotepadVO(i, i + "번 메모 제목", i + "번 메모 내용"));
         }
     }
 
