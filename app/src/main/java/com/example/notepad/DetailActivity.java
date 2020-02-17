@@ -55,6 +55,14 @@ public class DetailActivity extends AppCompatActivity {
             case android.R.id.home: // actionbar의 back 키 눌렀을 때 동작
                 finish();
                 break;
+            case R.id.action_edit: // edit 키 눌렀을 때 WriteActivity로 key 담은 intent 전달
+                // TODO : use key data.
+                // WriteActivity index 값 전달
+                Intent intent = new Intent(DetailActivity.this, WriteActivity.class);
+                intent.putExtra("key", key);
+                startActivity(intent);
+                finish();
+                break;
             case R.id.action_delete: // actionbar의 delete 키 눌렀을 때 동작
                 NoteDB.getArticle(key).setDelete(true); // NoteDB의 delete 변수를 true로 만들어 삭제된 데이터라고 알림
                 NoteDB.save(getFilesDir());

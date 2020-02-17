@@ -3,6 +3,7 @@ package com.example.notepad;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +23,8 @@ public class WriteActivity extends AppCompatActivity {
 
     Button load, save;
     EditText inputTitle, inputText;
+    private String key = null;
+    private DetailNotepadVO detailNotepadVO = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,18 +40,25 @@ public class WriteActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝 //
 
-        load= (Button) findViewById(R.id.load);
+        load = (Button) findViewById(R.id.load);
         save = (Button) findViewById(R.id.save);
         inputTitle = (EditText) findViewById(R.id.inputTitle);
         inputText = (EditText) findViewById(R.id.inputText);
 
         load.setOnClickListener(listener);
         save.setOnClickListener(listener);
+
+        // Intent 받아옴
+        Intent intent = getIntent();
+        if(intent.hasExtra("key")) {
+            key = intent.getStringExtra("key");
+            detailNotepadVO = NoteDB.getArticle(key);
+            inputTitle.setText(detailNotepadVO.getTitleStr());
+            inputText.setText(detailNotepadVO.getDescription());
+        }
     }
     View.OnClickListener listener = new View.OnClickListener() {
-
         @Override
-
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.load:
@@ -67,8 +77,12 @@ public class WriteActivity extends AppCompatActivity {
                     FileOutputStream fos = null;
                     int size = NoteDB.getIndexes().size();
                     try {
-                        System.out.println("size"+size);
-                        NoteDB.addArticle(size+"번 메모", new DetailNotepadVO(size, inputTitle.getText().toString(), inputText.getText().toString()));
+                        if(key != null){ // 편집시 실행되는 부분
+                            NoteDB.addArticle(key, new DetailNotepadVO(detailNotepadVO.getNotepadNo(), inputTitle.getText().toString(), inputText.getText().toString()));
+                        }
+                        else { // 작성시 실행되는 부분
+                            NoteDB.addArticle(size + "번 메모", new DetailNotepadVO(size, inputTitle.getText().toString(), inputText.getText().toString()));
+                        }
                         NoteDB.save(getFilesDir());
 
                         Toast.makeText(WriteActivity.this, "save 완료", Toast.LENGTH_SHORT).show();
