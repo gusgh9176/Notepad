@@ -21,6 +21,10 @@ import com.example.notepad.vo.DetailNotepadVO;
 
 public class MainActivity extends AppCompatActivity {
 
+    ListView listview ;
+    ListViewAdapter adapter;
+    int listviewCount = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,9 +37,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝 //
 
-        ListView listview ;
-        ListViewAdapter adapter;
-
         // Adapter 생성
         adapter = new ListViewAdapter() ;
 
@@ -43,12 +44,10 @@ public class MainActivity extends AppCompatActivity {
         listview = (ListView) findViewById(R.id.listview1);
         listview.setAdapter(adapter);
 
-        prepareNoteDB(); // 임시 DB 생성
+//        prepareNoteDB(); // 임시 DB 생성
 
         for ( int i = 0; i < NoteDB.getIndexes().size(); i++ ) {
-            String index = NoteDB.getIndexes().get(i);
-            String description = NoteDB.getArticle(index).getDescription();
-            adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, description);
+            addItemAdapter(i);
         }
 
         // 위에서 생성한 listview에 클릭 이벤트 핸들러 정의.
@@ -91,8 +90,30 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "메모 작성 클릭", Toast.LENGTH_SHORT).show();
             return true;
         }
+        if (id == R.id.action_refresh) {
+            for ( int i = listviewCount; i < NoteDB.getIndexes().size(); i++ ) {
+                System.out.println("새로고침테스트");
+                addItemAdapter(i);
+            }
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        for ( int i = listviewCount; i < NoteDB.getIndexes().size(); i++ ) {
+            addItemAdapter(i);
+        }
+    }
+
+    private void addItemAdapter(int i){
+        String index = NoteDB.getIndexes().get(i);
+        String description = NoteDB.getArticle(index).getDescription();
+        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, description);
+        adapter.notifyDataSetChanged();
+        listviewCount++;
     }
 
     private void prepareNoteDB() {
