@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 // get item
                 ListViewNotepadVO item = (ListViewNotepadVO) parent.getItemAtPosition(position) ;
 
+                String index = item.getIndex();
                 String titleStr = item.getTitleStr() ;
                 String descStr = item.getDescStr() ;
                 Drawable iconDrawable = item.getIconDrawable() ;
@@ -64,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 // TODO : use item data.
                 // DetailActivity로 index 값 전달
                 Intent intent = new Intent(v.getContext(), DetailActivity.class);
-                intent.putExtra("key", titleStr);
+                intent.putExtra("key", index);
                 startActivity(intent);
             }
         }) ;
@@ -110,8 +111,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void addItemAdapter(int i){
         String index = NoteDB.getIndexes().get(i);
+        String title = NoteDB.getArticle(index).getTitleStr();
         String description = NoteDB.getArticle(index).getDescription();
-        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, description);
+        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, title, description);
         adapter.notifyDataSetChanged();
         listviewCount++;
     }
