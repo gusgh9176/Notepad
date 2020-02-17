@@ -1,6 +1,8 @@
 package com.example.notepad.vo;
 
-public class DetailNotepadVO {
+import java.io.Serializable;
+
+public class DetailNotepadVO implements Serializable {
     private int notepadNo;
     private String titleStr;
     private String description;

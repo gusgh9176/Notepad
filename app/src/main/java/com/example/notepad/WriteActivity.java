@@ -6,12 +6,14 @@ import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.example.notepad.db.NoteDB;
+import com.example.notepad.vo.DetailNotepadVO;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,7 +21,7 @@ import java.io.FileOutputStream;
 public class WriteActivity extends AppCompatActivity {
 
     Button load, save;
-    EditText inputText;
+    EditText inputTitle, inputText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,7 @@ public class WriteActivity extends AppCompatActivity {
 
         load= (Button) findViewById(R.id.load);
         save = (Button) findViewById(R.id.save);
+        inputTitle = (EditText) findViewById(R.id.inputTitle);
         inputText = (EditText) findViewById(R.id.inputText);
 
         load.setOnClickListener(listener);
@@ -52,36 +55,25 @@ public class WriteActivity extends AppCompatActivity {
                     Log.i("TAG", "load 진행");
                     FileInputStream fis = null;
                     try{
-                        fis = openFileInput("memo.txt");
-                        byte[] data = new byte[fis.available()];
-                        while( fis.read(data) != -1){
-                        }
-
-                        inputText.setText(new String(data));
+                        NoteDB.load(getFilesDir());
                         Toast.makeText(WriteActivity.this, "load 완료", Toast.LENGTH_SHORT).show();
                     }catch(Exception e){
                         e.printStackTrace();
-                    }finally{
-                        try{ if(fis != null) fis.close(); }catch(Exception e){e.printStackTrace();}
                     }
                     break;
 
                 case R.id.save:
                     Log.i("TAG", "save 진행");
                     FileOutputStream fos = null;
+                    int size = NoteDB.getIndexes().size();
                     try {
-                        fos = openFileOutput("memo.txt", Context.MODE_PRIVATE);
-                        String out = inputText.getText().toString();
-                        fos.write(out.getBytes());
+                        System.out.println("size"+size);
+                        NoteDB.addArticle(size+"번 메모", new DetailNotepadVO(size, inputTitle.getText().toString(), inputText.getText().toString()));
+                        NoteDB.save(getFilesDir());
+
                         Toast.makeText(WriteActivity.this, "save 완료", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         e.printStackTrace();
-                    } finally {
-                        try {
-                            if (fos != null) fos.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
                     }
                     break;
             }

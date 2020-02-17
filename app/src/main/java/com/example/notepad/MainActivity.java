@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         listview.setAdapter(adapter);
 
 //        prepareNoteDB(); // 임시 DB 생성
+        NoteDB.load(getFilesDir()); // 이전 메모 불러오기
 
         for ( int i = 0; i < NoteDB.getIndexes().size(); i++ ) {
             addItemAdapter(i);
