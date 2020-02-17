@@ -84,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         //or switch문을 이용하면 될듯 하다.
         if (id == R.id.action_write) {
+            Intent intent = new Intent(MainActivity.this, WriteActivity.class);
+            startActivity(intent);
+
             Toast.makeText(this, "메모 작성 클릭", Toast.LENGTH_SHORT).show();
             return true;
         }
