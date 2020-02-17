@@ -26,12 +26,14 @@ public class WriteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write);
 
-        //액션바 타이틀 변경하기
+        // 액션바 설정하기 //
+        // 액션바 타이틀 변경하기
         getSupportActionBar().setTitle("새 메모 작성하기");
         // 액션바 뒤로가기 버튼 추가
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //액션바 배경색 변경
+        // 액션바 배경색 변경
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
+        // 액션바 설정 끝 //
 
         load= (Button) findViewById(R.id.load);
         save = (Button) findViewById(R.id.save);
@@ -86,6 +88,7 @@ public class WriteActivity extends AppCompatActivity {
         }
 
     };
+    // 액션버튼을 클릭했을때의 동작
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){

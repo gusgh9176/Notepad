@@ -26,11 +26,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //액션바 설정하기//
-        //액션바 타이틀 변경하기
+        // 액션바 설정하기 //
+        // 액션바 타이틀 변경하기
         getSupportActionBar().setTitle("메모리스트");
-        //액션바 배경색 변경
+        // 액션바 배경색 변경
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
+        // 액션바 설정 끝 //
 
         ListView listview ;
         ListViewAdapter adapter;
@@ -71,14 +72,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //액션버튼 메뉴 액션바에 집어 넣기
+    // 액션버튼 메뉴 액션바에 집어 넣기
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
-    //액션버튼을 클릭했을때의 동작
+    // 액션버튼을 클릭했을때의 동작
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         int id = item.getItemId();
