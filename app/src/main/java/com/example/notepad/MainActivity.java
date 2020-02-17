@@ -105,8 +105,10 @@ public class MainActivity extends AppCompatActivity {
         listview.setAdapter(adapter);
         for(int i=0; i < NoteDB.getIndexes().size(); i++) {
             String index = NoteDB.getIndexes().get(i);
+            boolean delete = NoteDB.getArticle(index).isDelete();
             String title = NoteDB.getArticle(index).getTitleStr();
             String description = NoteDB.getArticle(index).getDescription();
+            if(delete) {continue;} // 삭제를 한 상태라면 해당 인덱스 작업 스킵
             adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, title, description);
             adapter.notifyDataSetChanged();
         }

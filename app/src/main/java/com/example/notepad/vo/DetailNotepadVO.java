@@ -6,6 +6,7 @@ public class DetailNotepadVO implements Serializable {
     private int notepadNo;
     private String titleStr;
     private String description;
+    private boolean delete = false;
 
     public DetailNotepadVO(int notepadNo, String titleStr, String description) {
         this.notepadNo = notepadNo;
@@ -35,5 +36,13 @@ public class DetailNotepadVO implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public boolean isDelete() {
+        return delete;
+    }
+
+    public void setDelete(boolean delete) {
+        this.delete = delete;
     }
 }
