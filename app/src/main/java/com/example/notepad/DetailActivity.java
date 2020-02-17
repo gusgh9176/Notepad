@@ -23,6 +23,8 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        //액션바 타이틀 변경하기
+        getSupportActionBar().setTitle("상세 메모 보기");
         // 액션바 뒤로가기 버튼 추가
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         //액션바 배경색 변경
