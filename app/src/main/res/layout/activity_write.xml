@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="4"
             android:gravity="center"
-            android:text="제목"
+            android:text="@string/text_title"
             android:textSize="18sp" />
 
         <EditText
@@ -52,12 +52,12 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/save"
-            android:text="저장"/>
+            android:text="@string/action_save"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/load"
-            android:text="불러오기"/>
+            android:text="@string/action_load"/>
     </LinearLayout>
 
 </LinearLayout>
