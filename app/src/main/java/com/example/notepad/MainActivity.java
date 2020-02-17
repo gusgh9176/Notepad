@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     ListView listview ;
     ListViewAdapter adapter;
-    int listviewCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,19 +36,11 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝 //
 
-        // Adapter 생성
-        adapter = new ListViewAdapter() ;
-
-        // 리스트뷰 참조 및 Adapter달기
-        listview = (ListView) findViewById(R.id.listview1);
-        listview.setAdapter(adapter);
 
 //        prepareNoteDB(); // 임시 DB 생성
         NoteDB.load(getFilesDir()); // 이전 메모 불러오기
 
-        for ( int i = 0; i < NoteDB.getIndexes().size(); i++ ) {
-            addItemAdapter(i);
-        }
+        addItemAdapter();
 
         // 위에서 생성한 listview에 클릭 이벤트 핸들러 정의.
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -93,10 +84,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         if (id == R.id.action_refresh) {
-            for ( int i = listviewCount; i < NoteDB.getIndexes().size(); i++ ) {
-                System.out.println("새로고침테스트");
-                addItemAdapter(i);
-            }
+            addItemAdapter();
+            Toast.makeText(this, "새로 고침", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -105,18 +94,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume(){
         super.onResume();
-        for ( int i = listviewCount; i < NoteDB.getIndexes().size(); i++ ) {
-            addItemAdapter(i);
-        }
+        addItemAdapter();
     }
 
-    private void addItemAdapter(int i){
-        String index = NoteDB.getIndexes().get(i);
-        String title = NoteDB.getArticle(index).getTitleStr();
-        String description = NoteDB.getArticle(index).getDescription();
-        adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, title, description);
-        adapter.notifyDataSetChanged();
-        listviewCount++;
+    private void addItemAdapter(){
+        // Adapter 생성
+        adapter = new ListViewAdapter() ;
+        // 리스트뷰 참조 및 Adapter달기
+        listview = (ListView) findViewById(R.id.listview1);
+        listview.setAdapter(adapter);
+        for(int i=0; i < NoteDB.getIndexes().size(); i++) {
+            String index = NoteDB.getIndexes().get(i);
+            String title = NoteDB.getArticle(index).getTitleStr();
+            String description = NoteDB.getArticle(index).getDescription();
+            adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, title, description);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     private void prepareNoteDB() {
