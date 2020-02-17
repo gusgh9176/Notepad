@@ -50,9 +50,9 @@ public class ListViewAdapter extends BaseAdapter {
         ListViewNotepadVO listViewNotepadVO = listViewItemList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
-        iconImageView.setImageDrawable(listViewNotepadVO.getIcon());
-        titleTextView.setText(listViewNotepadVO.getTitle());
-        descTextView.setText(listViewNotepadVO.getDesc());
+        iconImageView.setImageDrawable(listViewNotepadVO.getIconDrawable());
+        titleTextView.setText(listViewNotepadVO.getTitleStr());
+        descTextView.setText(listViewNotepadVO.getDescStr());
 
         return convertView;
     }
@@ -73,9 +73,9 @@ public class ListViewAdapter extends BaseAdapter {
     public void addItem(Drawable icon, String title, String desc) {
         ListViewNotepadVO item = new ListViewNotepadVO();
 
-        item.setIcon(icon);
-        item.setTitle(title);
-        item.setDesc(desc);
+        item.setIconDrawable(icon);
+        item.setTitleStr(title);
+        item.setDescStr(desc);
 
         listViewItemList.add(item);
     }

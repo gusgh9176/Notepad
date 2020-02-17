@@ -4,26 +4,39 @@ import android.graphics.drawable.Drawable;
 
 public class ListViewNotepadVO {
     private Drawable iconDrawable ;
+    private String index;
     private String titleStr ;
     private String descStr ;
 
-    public void setIcon(Drawable icon) {
-        iconDrawable = icon ;
-    }
-    public void setTitle(String title) {
-        titleStr = title ;
-    }
-    public void setDesc(String desc) {
-        descStr = desc ;
+    public Drawable getIconDrawable() {
+        return iconDrawable;
     }
 
-    public Drawable getIcon() {
-        return this.iconDrawable ;
+    public void setIconDrawable(Drawable iconDrawable) {
+        this.iconDrawable = iconDrawable;
     }
-    public String getTitle() {
-        return this.titleStr ;
+
+    public String getIndex() {
+        return index;
     }
-    public String getDesc() {
-        return this.descStr ;
+
+    public void setIndex(String index) {
+        this.index = index;
+    }
+
+    public String getTitleStr() {
+        return titleStr;
+    }
+
+    public void setTitleStr(String titleStr) {
+        this.titleStr = titleStr;
+    }
+
+    public String getDescStr() {
+        return descStr;
+    }
+
+    public void setDescStr(String descStr) {
+        this.descStr = descStr;
     }
 }

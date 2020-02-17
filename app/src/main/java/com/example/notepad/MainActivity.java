@@ -57,9 +57,9 @@ public class MainActivity extends AppCompatActivity {
                 // get item
                 ListViewNotepadVO item = (ListViewNotepadVO) parent.getItemAtPosition(position) ;
 
-                String titleStr = item.getTitle() ;
-                String descStr = item.getDesc() ;
-                Drawable iconDrawable = item.getIcon() ;
+                String titleStr = item.getTitleStr() ;
+                String descStr = item.getDescStr() ;
+                Drawable iconDrawable = item.getIconDrawable() ;
 
                 // TODO : use item data.
                 // DetailActivity로 index 값 전달
