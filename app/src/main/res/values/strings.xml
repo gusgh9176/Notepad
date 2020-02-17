@@ -5,4 +5,5 @@
     <string name="action_settings">설정</string>
     <string name="action_edit">편집</string>
     <string name="action_delete">삭제</string>
+    <string name="action_refresh">새로고침</string>
 </resources>

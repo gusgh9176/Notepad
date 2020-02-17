@@ -10,6 +10,10 @@
         android:title="@string/action_write"
         app:showAsAction="always" />
     <item
+        android:id="@+id/action_refresh"
+        android:title="@string/action_refresh"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_setting"
         android:title="@string/action_settings"
         app:showAsAction="ifRoom" />
