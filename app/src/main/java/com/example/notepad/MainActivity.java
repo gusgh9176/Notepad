@@ -3,6 +3,7 @@ package com.example.notepad;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -18,6 +19,10 @@ import com.example.notepad.adapter.ListViewAdapter;
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.vo.ListViewNotepadVO;
 import com.example.notepad.vo.DetailNotepadVO;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        tedPermission(); // 권한 체크
 
         // 액션바 설정하기 //
         // 액션바 타이틀 변경하기
@@ -61,7 +68,25 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         }) ;
+    }
+    private void tedPermission() {
+        PermissionListener permissionListener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                // 권한 요청 성공
+            }
 
+            @Override
+            public void onPermissionDenied(ArrayList<String> deniedPermissions) {
+                // 권한 요청 실패
+            }
+        };
+        TedPermission.with(this)
+                .setPermissionListener(permissionListener)
+                .setRationaleMessage(getResources().getString(R.string.permission_2))
+                .setDeniedMessage(getResources().getString(R.string.permission_1))
+                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+                .check();
     }
 
     // 액션버튼 메뉴 액션바에 집어 넣기
