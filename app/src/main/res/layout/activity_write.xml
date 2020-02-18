@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,12 +32,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_weight="10">
+        android:layout_weight="10"
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/inputText"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="9"
             android:gravity="top"
@@ -46,12 +47,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_weight="1">
-        <ListView
-            android:id="@+id/wrPicListView"
+        android:layout_weight="1"
+        android:baselineAligned="false">
+        <HorizontalScrollView
+            android:id="@+id/picScrollview"
             android:layout_width="match_parent"
-            android:layout_height="60dp"/>
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/picList"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </HorizontalScrollView>
     </LinearLayout>
 
 </LinearLayout>
