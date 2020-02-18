@@ -21,7 +21,5 @@
 
 <!--    In write_menu-->
     <string name="action_writeComplete">작성 완료</string>
-    <string name="action_camera">사진 추가(카메라)</string>
-    <string name="action_album">사진 추가(앨범)</string>
 
 </resources>

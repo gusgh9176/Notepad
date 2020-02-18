@@ -37,9 +37,8 @@
 
         <EditText
             android:id="@+id/inputText"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="9"
             android:gravity="top"
             android:textIsSelectable="false" />
     </LinearLayout>
@@ -48,7 +47,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:baselineAligned="false">
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+<!--        사진 추가 버튼-->
+        <Button
+            android:id="@+id/btnInputPic"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:text="@string/btn_pic" />
+<!--        사진이 리스트로 보여지는 부분-->
         <HorizontalScrollView
             android:id="@+id/picScrollview"
             android:layout_width="match_parent"
@@ -57,8 +64,9 @@
                 android:orientation="horizontal"
                 android:id="@+id/picList"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
         </HorizontalScrollView>
+
     </LinearLayout>
 
 </LinearLayout>

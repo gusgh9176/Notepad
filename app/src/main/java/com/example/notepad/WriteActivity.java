@@ -5,6 +5,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.FileProvider;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -17,6 +19,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,12 +33,15 @@ import com.example.notepad.vo.DetailNotepadVO;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 public class WriteActivity extends AppCompatActivity {
 
     EditText inputTitle, inputText;
+    Button btnInputPic;
     private String key = null;
     private DetailNotepadVO detailNotepadVO = null;
 
@@ -59,8 +66,11 @@ public class WriteActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝 //
 
+        btnInputPic = (Button) findViewById(R.id.btnInputPic);
         inputTitle = (EditText) findViewById(R.id.inputTitle);
         inputText = (EditText) findViewById(R.id.inputText);
+
+        btnInputPic.setOnClickListener(listener);
 
         // Intent 받아옴
         Intent intent = getIntent();
@@ -70,6 +80,46 @@ public class WriteActivity extends AppCompatActivity {
             inputTitle.setText(detailNotepadVO.getTitleStr());
             inputText.setText(detailNotepadVO.getDescription());
         }
+    }
+
+    View.OnClickListener listener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.btnInputPic: {
+                    show();
+                    break;
+                }
+            }
+        }
+
+    };
+    void show()
+    {
+        final List<String> ListItems = new ArrayList<>();
+        ListItems.add("카메라");
+        ListItems.add("앨범");
+        ListItems.add("URL");
+        final CharSequence[] items =  ListItems.toArray(new String[ ListItems.size()]);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("추가 방식");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int pos) {
+                String selectedText = items[pos].toString();
+                // pos = 0 카메라, pos = 1 앨범, pos = 2 URL
+                switch (pos){
+                    case 0:
+                        takePhoto();
+                        break;
+                    case 1:
+                        goToAlbum();
+                        break;
+                }
+                Toast.makeText(WriteActivity.this, selectedText, Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.show();
     }
 
     // 액션버튼 메뉴 액션바에 집어 넣기
@@ -105,12 +155,6 @@ public class WriteActivity extends AppCompatActivity {
                 }
                 break;
             }
-            case R.id.action_camera:
-                takePhoto();
-                break;
-            case R.id.action_album:
-                goToAlbum();
-                break;
         }
         return super.onOptionsItemSelected(item);
     }
