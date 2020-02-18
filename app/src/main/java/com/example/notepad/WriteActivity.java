@@ -2,7 +2,6 @@ package com.example.notepad;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -17,12 +16,11 @@ import android.widget.Toast;
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.vo.DetailNotepadVO;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 public class WriteActivity extends AppCompatActivity {
 
-    Button load, save;
+    Button save;
     EditText inputTitle, inputText;
     private String key = null;
     private DetailNotepadVO detailNotepadVO = null;
@@ -41,12 +39,10 @@ public class WriteActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝 //
 
-        load = (Button) findViewById(R.id.load);
         save = (Button) findViewById(R.id.save);
         inputTitle = (EditText) findViewById(R.id.inputTitle);
         inputText = (EditText) findViewById(R.id.inputText);
 
-        load.setOnClickListener(listener);
         save.setOnClickListener(listener);
 
         // Intent 받아옴
@@ -62,17 +58,6 @@ public class WriteActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
-                case R.id.load:
-                    Log.i("TAG", "load 진행");
-                    FileInputStream fis = null;
-                    try{
-                        NoteDB.load(getFilesDir());
-                        Toast.makeText(WriteActivity.this, "load 완료", Toast.LENGTH_SHORT).show();
-                    }catch(Exception e){
-                        e.printStackTrace();
-                    }
-                    break;
-
                 case R.id.save:
                     Log.i("TAG", "save 진행");
                     FileOutputStream fos = null;

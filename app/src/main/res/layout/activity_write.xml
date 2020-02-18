@@ -53,11 +53,6 @@
             android:layout_height="match_parent"
             android:id="@+id/save"
             android:text="@string/action_save"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/load"
-            android:text="@string/action_load"/>
     </LinearLayout>
 
 </LinearLayout>
