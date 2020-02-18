@@ -5,6 +5,11 @@
     tools:context=".WriteActivity">
 
     <item
+        android:id="@+id/action_writeComplete"
+        android:title="@string/action_writeComplete"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/action_album"
         android:title="@string/action_album"
         app:showAsAction="never" />
