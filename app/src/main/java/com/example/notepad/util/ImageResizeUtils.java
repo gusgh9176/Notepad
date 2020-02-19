@@ -12,103 +12,91 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class ImageResizeUtils {public static void resizeFile(File file, File newFile, int newWidth, Boolean isCamera) {
+public class ImageResizeUtils {
 
-    String TAG = "blackjin";
+    public static void resizeFile(File file, File newFile, int newWidth, Boolean isCamera) {
+        String TAG = "pic";
+        Bitmap originalBm = null;
+        Bitmap resizedBitmap = null;
 
-    Bitmap originalBm = null;
-    Bitmap resizedBitmap = null;
+        try {
 
-    try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inDither = true;
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inDither = true;
+            originalBm = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
-        originalBm = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+            if (isCamera) {
+                // 카메라인 경우 이미지를 상황에 맞게 회전시킨다
+                try {
+                    ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+                    int exifOrientation = exif.getAttributeInt(
+                            ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                    int exifDegree = exifOrientationToDegrees(exifOrientation);
+                    Log.d(TAG, "exifDegree : " + exifDegree);
 
-        if (isCamera) {
+                    originalBm = rotate(originalBm, exifDegree);
 
-            // 카메라인 경우 이미지를 상황에 맞게 회전시킨다
-            try {
-
-                ExifInterface exif = new ExifInterface(file.getAbsolutePath());
-                int exifOrientation = exif.getAttributeInt(
-                        ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-                int exifDegree = exifOrientationToDegrees(exifOrientation);
-                Log.d(TAG, "exifDegree : " + exifDegree);
-
-                originalBm = rotate(originalBm, exifDegree);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
-        }
+            if (originalBm == null) {
+                Log.e(TAG, ("파일 에러"));
+                return;
+            }
 
-        if (originalBm == null) {
-            Log.e(TAG, ("파일 에러"));
-            return;
-        }
+            int width = originalBm.getWidth();
+            int height = originalBm.getHeight();
 
-        int width = originalBm.getWidth();
-        int height = originalBm.getHeight();
+            float aspect, scaleWidth, scaleHeight;
+            if (width > height) {
+                if (width <= newWidth) return;
 
-        float aspect, scaleWidth, scaleHeight;
-        if (width > height) {
-            if (width <= newWidth) return;
+                aspect = (float) width / height;
 
-            aspect = (float) width / height;
+                scaleWidth = newWidth;
+                scaleHeight = scaleWidth / aspect;
+            }
+            else {
+                if (height <= newWidth) return;
 
-            scaleWidth = newWidth;
-            scaleHeight = scaleWidth / aspect;
+                aspect = (float) height / width;
 
-        } else {
+                scaleHeight = newWidth;
+                scaleWidth = scaleHeight / aspect;
 
-            if (height <= newWidth) return;
+            }
 
-            aspect = (float) height / width;
+            // create a matrix for the manipulation
+            Matrix matrix = new Matrix();
 
-            scaleHeight = newWidth;
-            scaleWidth = scaleHeight / aspect;
+            // resize the bitmap
+            matrix.postScale(scaleWidth / width, scaleHeight / height);
 
-        }
+            // recreate the new Bitmap
+            resizedBitmap = Bitmap.createBitmap(originalBm, 0, 0, width, height, matrix, true);
 
-        // create a matrix for the manipulation
-        Matrix matrix = new Matrix();
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, new FileOutputStream(newFile));
+            } else {
+                resizedBitmap.compress(Bitmap.CompressFormat.PNG, 80, new FileOutputStream(newFile));
+            }
 
-        // resize the bitmap
-        matrix.postScale(scaleWidth / width, scaleHeight / height);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
 
-        // recreate the new Bitmap
-        resizedBitmap = Bitmap.createBitmap(originalBm, 0, 0, width, height, matrix, true);
+            if (originalBm != null) {
+                originalBm.recycle();
+            }
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-
-            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, new FileOutputStream(newFile));
-
-        } else {
-
-            resizedBitmap.compress(Bitmap.CompressFormat.PNG, 80, new FileOutputStream(newFile));
-
-        }
-
-
-    } catch (FileNotFoundException e) {
-
-        e.printStackTrace();
-
-    } finally {
-
-        if (originalBm != null) {
-            originalBm.recycle();
-        }
-
-        if (resizedBitmap != null) {
-            resizedBitmap.recycle();
+            if (resizedBitmap != null) {
+                resizedBitmap.recycle();
+            }
         }
     }
-
-}
 
     /**
      * EXIF 정보를 회전각도로 변환하는 메서드
