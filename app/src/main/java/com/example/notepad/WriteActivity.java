@@ -26,12 +26,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.util.ImageResizeUtils;
 import com.example.notepad.vo.DetailNotepadVO;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,12 +46,17 @@ public class WriteActivity extends AppCompatActivity {
 
     EditText inputTitle, inputText;
     Button btnInputPic;
+    Bitmap urlBitmap;
+
     private String key = null;
     private DetailNotepadVO detailNotepadVO = null;
 
     private static final int PICK_FROM_ALBUM = 1;
     private static final int PICK_FROM_CAMERA = 2;
     private static final String TAG = "WriteActivity";
+    private static final int resizePicSize = 320;
+
+
     private File tempFile;
     private String packegeName = "com.example.notepad";
     boolean isCamera = false;
@@ -87,14 +96,14 @@ public class WriteActivity extends AppCompatActivity {
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.btnInputPic: {
-                    show();
+                    selPicInput();
                     break;
                 }
             }
         }
 
     };
-    void show()
+    void selPicInput()
     {
         final List<String> ListItems = new ArrayList<>();
         ListItems.add("카메라");
@@ -115,10 +124,35 @@ public class WriteActivity extends AppCompatActivity {
                     case 1:
                         goToAlbum();
                         break;
+                    case 2:
+                        selUrlInput();
+                        break;
                 }
-                Toast.makeText(WriteActivity.this, selectedText, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), selectedText, Toast.LENGTH_SHORT).show();
             }
         });
+        builder.show();
+    }
+
+    void selUrlInput(){
+        final EditText edittext = new EditText(this);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("URL");
+        builder.setMessage("원하는 이미지 URL을 입력해주세요");
+        builder.setView(edittext);
+        builder.setPositiveButton("입력",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        setUrlImage(edittext.getText().toString());
+                    }
+                });
+        builder.setNegativeButton("취소",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(),"취소되었습니다" ,Toast.LENGTH_SHORT).show();
+                    }
+                });
         builder.show();
     }
 
@@ -147,7 +181,7 @@ public class WriteActivity extends AppCompatActivity {
                         NoteDB.addArticle(size + "번 메모", new DetailNotepadVO(size, inputTitle.getText().toString(), inputText.getText().toString()));
                     }
                     NoteDB.save(getFilesDir());
-                    Toast.makeText(WriteActivity.this, "save 완료", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "작성 완료", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -157,6 +191,36 @@ public class WriteActivity extends AppCompatActivity {
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void takePhoto() {
+
+        isCamera = true;
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        try {
+            tempFile = createImageFile();
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "이미지 처리 오류! 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+            finish();
+            e.printStackTrace();
+        }
+        if (tempFile != null) {
+
+            // Android OS 7 이후
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                Uri photoUri = FileProvider.getUriForFile(this, packegeName+".provider", tempFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(intent, PICK_FROM_CAMERA);
+            }
+            // 이전
+            else{
+                Uri photoUri = Uri.fromFile(tempFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(intent, PICK_FROM_CAMERA);
+            }
+        }
     }
 
     private void goToAlbum() {
@@ -171,11 +235,10 @@ public class WriteActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_OK) {
-            Toast.makeText(this, "취소 되었습니다.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "취소 되었습니다.", Toast.LENGTH_SHORT).show();
             if(tempFile != null) {
                 if (tempFile.exists()) {
                     if (tempFile.delete()) {
-//                        Log.e(TAG, tempFile.getAbsolutePath() + " 삭제 성공");
                         tempFile = null;
                     }
                 }
@@ -219,7 +282,7 @@ public class WriteActivity extends AppCompatActivity {
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
         ImageView imageView = new AppCompatImageView(this);
 
-        ImageResizeUtils.resizeFile(tempFile, tempFile, 320, isCamera);
+        ImageResizeUtils.resizeFile(tempFile, tempFile, resizePicSize, isCamera);
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         Bitmap originalBm = BitmapFactory.decodeFile(tempFile.getAbsolutePath(), options);
@@ -227,40 +290,53 @@ public class WriteActivity extends AppCompatActivity {
         imageView.setImageBitmap(originalBm);
 
         li.addView(imageView);
-
     }
 
-    private void takePhoto() {
+    private void setUrlImage(String baseURL){
+        final String baseImageURL = baseURL;
+        LinearLayout li = (LinearLayout) findViewById(R.id.picList);
+        ImageView imageView = new AppCompatImageView(this);
 
-        isCamera = true;
+        Thread mThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(baseImageURL); // URL 주소를 이용해서 URL 객체 생성
 
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    //  아래 코드는 웹에서 이미지를 가져온 뒤
+                    //  이미지 뷰에 지정할 Bitmap을 생성하는 과정
 
+                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                    conn.setDoInput(true);
+                    conn.connect();
+
+                    InputStream is = conn.getInputStream();
+                    urlBitmap = BitmapFactory.decodeStream(is);
+                } catch(IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        mThread.start(); // 웹에서 이미지를 가져오는 작업 스레드 실행.
         try {
-            tempFile = createImageFile();
-        } catch (IOException e) {
-            Toast.makeText(this, "이미지 처리 오류! 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-            finish();
+            //  메인 스레드는 작업 스레드가 이미지 작업을 가져올 때까지
+            //  대기해야 하므로 작업스레드의 join() 메소드를 호출해서
+            //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
+
+            mThread.join();
+
+            //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
+            //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
+
+            Glide.with(this).load(urlBitmap).override(resizePicSize, resizePicSize).into(imageView);
+            li.addView(imageView);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (tempFile != null) {
-
-            // Android OS 7 이후
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                Uri photoUri = FileProvider.getUriForFile(this, packegeName+".provider", tempFile);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                startActivityForResult(intent, PICK_FROM_CAMERA);
-            }
-            // 이전
-            else{
-                Uri photoUri = Uri.fromFile(tempFile);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                startActivityForResult(intent, PICK_FROM_CAMERA);
-            }
-        }
     }
-    private File createImageFile() throws IOException {
 
+
+    private File createImageFile() throws IOException {
         // 이미지 파일 이름 ( _{시간}_ )
         String timeStamp = DateFormat.getDateInstance(DateFormat.MEDIUM).format(new Date());
         String imageFileName = timeStamp + "_";
