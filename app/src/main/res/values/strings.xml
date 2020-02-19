@@ -9,6 +9,7 @@
 <!--    In activity_write-->
     <string name="text_title">제목</string>
     <string name="action_save">저장</string>
+    <string name="btn_pic">사진 추가</string>
 
 <!--    In detail_menu-->
     <string name="action_edit">편집</string>
