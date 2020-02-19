@@ -104,7 +104,7 @@ public class ImageResizeUtils {
      * @param exifOrientation EXIF 회전각
      * @return 실제 각도
      */
-    public static int exifOrientationToDegrees(int exifOrientation) {
+    private static int exifOrientationToDegrees(int exifOrientation) {
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
             return 90;
         } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
@@ -122,7 +122,7 @@ public class ImageResizeUtils {
      * @param degrees 회전 각도
      * @return 회전된 이미지
      */
-    public static Bitmap rotate(Bitmap bitmap, int degrees) {
+    private static Bitmap rotate(Bitmap bitmap, int degrees) {
         if (degrees != 0 && bitmap != null) {
             Matrix m = new Matrix();
             m.setRotate(degrees, (float) bitmap.getWidth() / 2,
