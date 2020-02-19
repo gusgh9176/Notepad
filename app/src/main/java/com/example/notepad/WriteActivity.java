@@ -26,8 +26,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.notepad.db.NoteDB;
+import com.example.notepad.util.BitmapResizeUtils;
 import com.example.notepad.util.ImageResizeUtils;
 import com.example.notepad.vo.DetailNotepadVO;
 
@@ -144,6 +144,7 @@ public class WriteActivity extends AppCompatActivity {
         builder.setPositiveButton("입력",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+//                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
                         setUrlImage(edittext.getText().toString());
                     }
                 });
@@ -327,14 +328,18 @@ public class WriteActivity extends AppCompatActivity {
 
             //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
             //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
+            
+            urlBitmap = BitmapResizeUtils.resizeBitmap(urlBitmap, resizePicSize);
+            imageView.setImageBitmap(urlBitmap);
 
-            Glide.with(this).load(urlBitmap).override(resizePicSize, resizePicSize).into(imageView);
             li.addView(imageView);
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),"잘못된 URL 입니다.", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private File createImageFile() throws IOException {
         // 이미지 파일 이름 ( _{시간}_ )
