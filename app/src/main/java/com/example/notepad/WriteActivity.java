@@ -3,7 +3,6 @@ package com.example.notepad;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.FileProvider;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -25,12 +24,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.util.BitmapResizeUtils;
 import com.example.notepad.util.ImageResizeUtils;
 import com.example.notepad.vo.DetailNotepadVO;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +52,6 @@ public class WriteActivity extends AppCompatActivity {
     private static final int PICK_FROM_CAMERA = 2;
     private static final String TAG = "WriteActivity";
     private static final int resizePicSize = 320;
-
 
     private File tempFile;
     private String packegeName = "com.example.notepad";
@@ -103,7 +99,7 @@ public class WriteActivity extends AppCompatActivity {
         }
 
     };
-    void selPicInput()
+    private void selPicInput()
     {
         final List<String> ListItems = new ArrayList<>();
         ListItems.add("카메라");
@@ -134,28 +130,6 @@ public class WriteActivity extends AppCompatActivity {
         builder.show();
     }
 
-    void selUrlInput(){
-        final EditText edittext = new EditText(this);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("URL");
-        builder.setMessage("원하는 이미지 URL을 입력해주세요");
-        builder.setView(edittext);
-        builder.setPositiveButton("입력",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-//                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
-                        setUrlImage(edittext.getText().toString());
-                    }
-                });
-        builder.setNegativeButton("취소",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(),"취소되었습니다" ,Toast.LENGTH_SHORT).show();
-                    }
-                });
-        builder.show();
-    }
 
     // 액션버튼 메뉴 액션바에 집어 넣기
     @Override
@@ -232,6 +206,77 @@ public class WriteActivity extends AppCompatActivity {
         startActivityForResult(intent, PICK_FROM_ALBUM);
     }
 
+    private void selUrlInput(){
+        final EditText edittext = new EditText(this);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("URL");
+        builder.setMessage("원하는 이미지 URL을 입력해주세요");
+        builder.setView(edittext);
+        builder.setPositiveButton("입력",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+//                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
+                        setUrlImage(edittext.getText().toString());
+                    }
+                });
+        builder.setNegativeButton("취소",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(),"취소되었습니다" ,Toast.LENGTH_SHORT).show();
+                    }
+                });
+        builder.show();
+    }
+
+    private void setUrlImage(String baseURL){
+        final String baseImageURL = baseURL;
+        LinearLayout li = (LinearLayout) findViewById(R.id.picList);
+        ImageView imageView = new AppCompatImageView(this);
+
+        Thread mThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(baseImageURL); // URL 주소를 이용해서 URL 객체 생성
+
+                    //  아래 코드는 웹에서 이미지를 가져온 뒤
+                    //  이미지 뷰에 지정할 Bitmap을 생성하는 과정
+
+                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                    conn.setDoInput(true);
+                    conn.connect();
+
+                    InputStream is = conn.getInputStream();
+                    urlBitmap = BitmapFactory.decodeStream(is);
+                } catch(IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        mThread.start(); // 웹에서 이미지를 가져오는 작업 스레드 실행.
+        try {
+            //  메인 스레드는 작업 스레드가 이미지 작업을 가져올 때까지
+            //  대기해야 하므로 작업스레드의 join() 메소드를 호출해서
+            //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
+
+            mThread.join();
+
+            //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
+            //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
+
+            urlBitmap = BitmapResizeUtils.resizeBitmap(urlBitmap, resizePicSize);
+            imageView.setImageBitmap(urlBitmap);
+
+            li.addView(imageView);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(),"잘못된 URL 입니다.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -291,54 +336,6 @@ public class WriteActivity extends AppCompatActivity {
         imageView.setImageBitmap(originalBm);
 
         li.addView(imageView);
-    }
-
-    private void setUrlImage(String baseURL){
-        final String baseImageURL = baseURL;
-        LinearLayout li = (LinearLayout) findViewById(R.id.picList);
-        ImageView imageView = new AppCompatImageView(this);
-
-        Thread mThread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL(baseImageURL); // URL 주소를 이용해서 URL 객체 생성
-
-                    //  아래 코드는 웹에서 이미지를 가져온 뒤
-                    //  이미지 뷰에 지정할 Bitmap을 생성하는 과정
-
-                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-                    conn.setDoInput(true);
-                    conn.connect();
-
-                    InputStream is = conn.getInputStream();
-                    urlBitmap = BitmapFactory.decodeStream(is);
-                } catch(IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        };
-        mThread.start(); // 웹에서 이미지를 가져오는 작업 스레드 실행.
-        try {
-            //  메인 스레드는 작업 스레드가 이미지 작업을 가져올 때까지
-            //  대기해야 하므로 작업스레드의 join() 메소드를 호출해서
-            //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
-
-            mThread.join();
-
-            //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
-            //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
-            
-            urlBitmap = BitmapResizeUtils.resizeBitmap(urlBitmap, resizePicSize);
-            imageView.setImageBitmap(urlBitmap);
-
-            li.addView(imageView);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),"잘못된 URL 입니다.", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private File createImageFile() throws IOException {
