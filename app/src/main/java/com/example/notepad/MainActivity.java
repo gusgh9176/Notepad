@@ -130,9 +130,9 @@ public class MainActivity extends AppCompatActivity {
         listview.setAdapter(adapter);
         for(int i=0; i < NoteDB.getIndexes().size(); i++) {
             String index = NoteDB.getIndexes().get(i);
-            boolean delete = NoteDB.getArticle(index).isDelete();
-            String title = NoteDB.getArticle(index).getTitleStr();
-            String description = NoteDB.getArticle(index).getDescription();
+            boolean delete = NoteDB.getNotepad(index).isDelete();
+            String title = NoteDB.getNotepad(index).getTitleStr();
+            String description = NoteDB.getNotepad(index).getDescription();
             if(delete) {continue;} // 삭제를 한 상태라면 해당 인덱스 작업 스킵
             adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, title, description);
             adapter.notifyDataSetChanged();
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void prepareNoteDB() {
         for ( int i = 1; i < 100; i++ ){
-            NoteDB.addArticle(i + "번 메모", new DetailNotepadVO(i, i + "번 메모 제목", i + "번 메모 내용"));
+            NoteDB.addNotepad(i + "번 메모", new DetailNotepadVO(i, i + "번 메모 제목", i + "번 메모 내용"));
         }
     }
 

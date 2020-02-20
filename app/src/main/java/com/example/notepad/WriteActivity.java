@@ -81,7 +81,7 @@ public class WriteActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if(intent.hasExtra("key")) {
             key = intent.getStringExtra("key");
-            detailNotepadVO = NoteDB.getArticle(key);
+            detailNotepadVO = NoteDB.getNotepad(key);
             inputTitle.setText(detailNotepadVO.getTitleStr());
             inputText.setText(detailNotepadVO.getDescription());
         }
@@ -150,10 +150,10 @@ public class WriteActivity extends AppCompatActivity {
                 int size = NoteDB.getIndexes().size();
                 try {
                     if(key != null){ // 편집시 실행되는 부분
-                        NoteDB.addArticle(key, new DetailNotepadVO(detailNotepadVO.getNotepadNo(), inputTitle.getText().toString(), inputText.getText().toString()));
+                        NoteDB.addNotepad(key, new DetailNotepadVO(detailNotepadVO.getNotepadNo(), inputTitle.getText().toString(), inputText.getText().toString()));
                     }
                     else { // 작성시 실행되는 부분
-                        NoteDB.addArticle(size + "번 메모", new DetailNotepadVO(size, inputTitle.getText().toString(), inputText.getText().toString()));
+                        NoteDB.addNotepad(size + "번 메모", new DetailNotepadVO(size, inputTitle.getText().toString(), inputText.getText().toString()));
                     }
                     NoteDB.save(getFilesDir());
                     Toast.makeText(getApplicationContext(), "작성 완료", Toast.LENGTH_SHORT).show();

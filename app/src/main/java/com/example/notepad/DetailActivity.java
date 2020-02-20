@@ -41,7 +41,7 @@ public class DetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
         key = intent.getStringExtra("key");
 
-        DetailNotepadVO articleVO = NoteDB.getArticle(key);
+        DetailNotepadVO articleVO = NoteDB.getNotepad(key);
 
         tvTitle.setText(articleVO.getTitleStr());
         tvNotepadNumber.setText(Integer.toString(articleVO.getNotepadNo()));
@@ -64,7 +64,7 @@ public class DetailActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.action_delete: // actionbar의 delete 키 눌렀을 때 동작
-                NoteDB.getArticle(key).setDelete(true); // NoteDB의 delete 변수를 true로 만들어 삭제된 데이터라고 알림
+                NoteDB.getNotepad(key).setDelete(true); // NoteDB의 delete 변수를 true로 만들어 삭제된 데이터라고 알림
                 NoteDB.save(getFilesDir());
                 Toast.makeText(this, "해당 메모가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
                 finish();

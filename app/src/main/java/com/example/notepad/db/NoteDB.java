@@ -19,11 +19,11 @@ public class NoteDB {
     private static Map<String, DetailNotepadVO> db = new LinkedHashMap<String, DetailNotepadVO>();
     private static File file;
 
-    public static void addArticle(String index, DetailNotepadVO DetailNotepadVO){
+    public static void addNotepad(String index, DetailNotepadVO DetailNotepadVO){
         db.put(index, DetailNotepadVO);
     }
 
-    public static DetailNotepadVO getArticle(String index){
+    public static DetailNotepadVO getNotepad(String index){
         return db.get(index);
     }
 
