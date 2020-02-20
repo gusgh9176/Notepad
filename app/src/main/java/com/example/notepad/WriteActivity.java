@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.util.BitmapResizeUtils;
 import com.example.notepad.util.ImageResizeUtils;
@@ -353,4 +354,7 @@ public class WriteActivity extends AppCompatActivity {
 
         return image;
     }
+
+
+
 }
