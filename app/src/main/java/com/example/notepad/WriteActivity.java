@@ -234,7 +234,9 @@ public class WriteActivity extends AppCompatActivity {
         builder.setPositiveButton("입력",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
+//                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
+//                        setUrlImage("https://windowsforum.kr/files/attach/images/48/259/173/007/8c16ab12f4d41c4a6c358f4163888a2e.jpg");
+                        setUrlImage("https://t1.daumcdn.net/cfile/tistory/12630F0B4C5508590C");
 //                        setUrlImage(edittext.getText().toString());
                     }
                 });
@@ -290,8 +292,7 @@ public class WriteActivity extends AppCompatActivity {
             //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
             //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
 
-            urlBitmap = BitmapResizeUtils.resizeBitmap(urlBitmap, resizePicSize);
-            imageView.setImageBitmap(urlBitmap);
+            Glide.with(this).load(urlBitmap).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
 
             li.addView(imageView);
         } catch (InterruptedException e) {
