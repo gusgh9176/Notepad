@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        
+
         switch (id){
             case R.id.action_write:
                 Intent intent = new Intent(MainActivity.this, WriteActivity.class);
@@ -130,20 +130,20 @@ public class MainActivity extends AppCompatActivity {
     private void addItemAdapter() {
         // Adapter 생성
         adapter = new ListViewAdapter();
+        // Drawable 생성
+        Drawable drawable;
         // 리스트뷰 참조 및 Adapter달기
         listview = (ListView) findViewById(R.id.listview1);
         listview.setAdapter(adapter);
+
         for (int i = 0; i < NoteDB.getIndexes().size(); i++) {
             String index = NoteDB.getIndexes().get(i);
             boolean delete = NoteDB.getNotepad(index).isDelete();
             String title = NoteDB.getNotepad(index).getTitleStr();
             String description = NoteDB.getNotepad(index).getDescription();
 
-            ImageVO imageVO = ImageDB.getImage(index + 0);
-            Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_action_camera);
-            if (imageVO != null) {
-                ImageView imageView = setImage(imageVO.getImageUrl());
-                drawable = imageView.getDrawable();
+            if (delete) { // 삭제를 한 상태라면 해당 인덱스 작업 스킵
+                continue;
             }
 
             // maxDescription 값보다 본문이 길면 값만큼 잘라서 보여줌
@@ -151,13 +151,18 @@ public class MainActivity extends AppCompatActivity {
                 description = description.substring(0, maxDescription) + "...";
             }
 
-            if (delete) { // 삭제를 한 상태라면 해당 인덱스 작업 스킵
-                continue;
+            ImageVO imageVO = ImageDB.getImage(index + 0);
+
+            if (imageVO != null) {
+                ImageView imageView = setImage(imageVO.getImageUrl());
+                drawable = imageView.getDrawable();
+            }
+            else{
+                drawable = ContextCompat.getDrawable(this, R.drawable.ic_action_camera);
             }
             adapter.addItem(drawable, index, title, description);
-            adapter.notifyDataSetChanged();
-
         }
+        adapter.notifyDataSetChanged();
     }
 
     private ImageView setImage(String path) {
