@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.vo.DetailNotepadVO;
 
+
 public class DetailActivity extends AppCompatActivity {
 
     private TextView tvTitle;
@@ -43,10 +44,13 @@ public class DetailActivity extends AppCompatActivity {
 
         DetailNotepadVO articleVO = NoteDB.getNotepad(key);
 
+
         tvTitle.setText(articleVO.getTitleStr());
         tvNotepadNumber.setText(Integer.toString(articleVO.getNotepadNo()));
         tvDescription.setText(articleVO.getDescription());
+
     }
+
 
     // 액션버튼을 클릭했을때의 동작
     @Override

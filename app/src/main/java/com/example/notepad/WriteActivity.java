@@ -46,8 +46,9 @@ public class WriteActivity extends AppCompatActivity {
     Button btnInputPic;
     Bitmap urlBitmap;
 
-    private String key = null;
+    private String key = null; // 편집 시 키
     private DetailNotepadVO detailNotepadVO = null;
+    private int imgCount = 0;
 
     private static final int PICK_FROM_ALBUM = 1;
     private static final int PICK_FROM_CAMERA = 2;
@@ -80,6 +81,7 @@ public class WriteActivity extends AppCompatActivity {
 
         // Intent 받아옴
         Intent intent = getIntent();
+        // 받아온 Intent에 key 존재 = 기존 것 편집
         if(intent.hasExtra("key")) {
             key = intent.getStringExtra("key");
             detailNotepadVO = NoteDB.getNotepad(key);
@@ -148,15 +150,17 @@ public class WriteActivity extends AppCompatActivity {
                 return true;
             }
             case R.id.action_writeComplete: { // actionbar의 작성 완료 눌렀을 때 동작
-                int size = NoteDB.getIndexes().size();
                 try {
                     if(key != null){ // 편집시 실행되는 부분
                         NoteDB.addNotepad(key, new DetailNotepadVO(detailNotepadVO.getNotepadNo(), inputTitle.getText().toString(), inputText.getText().toString()));
                     }
                     else { // 작성시 실행되는 부분
-                        NoteDB.addNotepad(size + "번 메모", new DetailNotepadVO(size, inputTitle.getText().toString(), inputText.getText().toString()));
+                        int NotepadNo = NoteDB.getIndexes().size();
+                        key = NotepadNo + "번 메모";
+                        NoteDB.addNotepad(key, new DetailNotepadVO(NotepadNo, inputTitle.getText().toString(), inputText.getText().toString()));
                     }
-                    NoteDB.save(getFilesDir());
+//                    PathDbCrudUtils.dbInsert(getApplicationContext()); // 추가한 사진들 db 업데이트
+                    NoteDB.save(getFilesDir()); // DB 파일 경로에 저장
                     Toast.makeText(getApplicationContext(), "작성 완료", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -217,8 +221,8 @@ public class WriteActivity extends AppCompatActivity {
         builder.setPositiveButton("입력",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-//                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
-                        setUrlImage(edittext.getText().toString());
+                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
+//                        setUrlImage(edittext.getText().toString());
                     }
                 });
         builder.setNegativeButton("취소",
@@ -230,6 +234,7 @@ public class WriteActivity extends AppCompatActivity {
         builder.show();
     }
 
+    // Url로 이미지 추가
     private void setUrlImage(String baseURL){
         final String baseImageURL = baseURL;
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
@@ -261,6 +266,11 @@ public class WriteActivity extends AppCompatActivity {
             //  대기해야 하므로 작업스레드의 join() 메소드를 호출해서
             //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
 
+            // @@@@@@@@@@@@@@@@@@@@@ Url 통해 사진 추가(context, imagePath, imgKind, memoKey)
+//            PathDbCrudUtils.addColumn(baseImageURL, 2, key);
+
+            System.out.println(baseImageURL);
+
             mThread.join();
 
             //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
@@ -278,6 +288,7 @@ public class WriteActivity extends AppCompatActivity {
         }
     }
 
+    // 카메라 실행 후, 앨범 사진 선택 후 실행되는 메소드
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -293,7 +304,13 @@ public class WriteActivity extends AppCompatActivity {
             return;
         }
 
-        if (requestCode == PICK_FROM_ALBUM) {
+        // 카메라 선택
+        if (requestCode == PICK_FROM_CAMERA) {
+            setImage();
+        }
+
+        // 앨범 선택
+        else if (requestCode == PICK_FROM_ALBUM) {
             Uri photoUri = data.getData();
             Cursor cursor = null;
             try {
@@ -312,14 +329,17 @@ public class WriteActivity extends AppCompatActivity {
                 cursor.moveToFirst();
 
                 tempFile = new File(cursor.getString(column_index));
+                System.out.println(tempFile.getAbsolutePath());
+
+                // !!!!!!!!!! 앨범에 있는 이미지 불러오면 같은 이미지 다른 메모에서 할 때 imagePath 유니크 키 문제 생김
+                // 앨범에서 불러와도 따로 저장을 하던 유니크 키 설정을 풀던 필요
+                // @@@@@@@@@@@@@@@@@@@@@ 앨범 통해 사진 추가(context, imagePath, imgKind, memoKey)
+//                PathDbCrudUtils.addColumn(tempFile.getAbsolutePath(), 1, key);
             } finally {
                 if (cursor != null) {
                     cursor.close();
                 }
             }
-            setImage();
-        }
-        else if (requestCode == PICK_FROM_CAMERA) {
             setImage();
         }
     }
@@ -344,12 +364,19 @@ public class WriteActivity extends AppCompatActivity {
         String timeStamp = DateFormat.getDateInstance(DateFormat.MEDIUM).format(new Date());
         String imageFileName = timeStamp + "_";
 
+        // 처음 작성시 key에 null 있음!!!!!!!!! 수정필요!!!
         // 이미지가 저장될 폴더 이름 ( 각 index(key) 값 )
         File storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/"+key+"/");
         if (!storageDir.exists()) storageDir.mkdirs();
 
         // 빈 파일 생성
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+
+        // @@@@@@@@@@@@@@@@@@@@@ 카메라 통해 사진 추가(context, imagePath, imgKind, memoKey)
+//        PathDbCrudUtils.addColumn(image.getAbsolutePath(), 0, key);
+
+        System.out.println(image.getAbsolutePath());
+
         Log.d(TAG, "createImageFile : " + image.getAbsolutePath());
 
         return image;
