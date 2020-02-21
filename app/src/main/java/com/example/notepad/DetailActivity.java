@@ -1,17 +1,26 @@
 package com.example.notepad;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.example.notepad.db.ImageDB;
 import com.example.notepad.db.NoteDB;
+import com.example.notepad.util.BitmapResizeUtils;
 import com.example.notepad.vo.DetailNotepadVO;
+import com.example.notepad.vo.ImageVO;
 
 
 public class DetailActivity extends AppCompatActivity {
@@ -35,6 +44,8 @@ public class DetailActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝
 
+        ImageDB.load(getFilesDir()); // 이전 이미지 불러오기
+
         tvTitle = (TextView) findViewById(R.id.tvTitle);
         tvNotepadNumber = (TextView) findViewById(R.id.tvNotepadNumber);
         tvDescription = (TextView) findViewById(R.id.tvDescription);
@@ -43,14 +54,29 @@ public class DetailActivity extends AppCompatActivity {
         key = intent.getStringExtra("key");
 
         DetailNotepadVO articleVO = NoteDB.getNotepad(key);
-
-
+        int imageOrder = 0;
+        ImageVO imageVO = ImageDB.getImage(key+imageOrder);
         tvTitle.setText(articleVO.getTitleStr());
         tvNotepadNumber.setText(Integer.toString(articleVO.getNotepadNo()));
         tvDescription.setText(articleVO.getDescription());
 
+        while(imageVO != null){
+
+            setImage(imageVO.getImageUrl());
+            imageOrder++;
+            imageVO = ImageDB.getImage(key+imageOrder);
+        }
+
     }
 
+    private void setImage(String path) {
+        LinearLayout li = (LinearLayout) findViewById(R.id.detailPicList);
+        ImageView imageView = new AppCompatImageView(this);
+
+        Glide.with(this).load(path).override(1280, 720).centerCrop().into(imageView);
+
+        li.addView(imageView);
+    }
 
     // 액션버튼을 클릭했을때의 동작
     @Override

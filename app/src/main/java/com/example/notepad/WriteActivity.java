@@ -25,10 +25,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.example.notepad.db.ImageDB;
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.util.BitmapResizeUtils;
 import com.example.notepad.util.ImageResizeUtils;
 import com.example.notepad.vo.DetailNotepadVO;
+import com.example.notepad.vo.ImageVO;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +43,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
+// 처음 작성시 key에 null 있음!!!!!!!!! 수정필요!!!
+// 편집시 imageOrder 정해줘야함
 public class WriteActivity extends AppCompatActivity {
 
     EditText inputTitle, inputText;
@@ -48,7 +53,8 @@ public class WriteActivity extends AppCompatActivity {
 
     private String key = null; // 편집 시 키
     private DetailNotepadVO detailNotepadVO = null;
-    private int imgCount = 0;
+    private int imageOrder;
+    private int NotepadNo;
 
     private static final int PICK_FROM_ALBUM = 1;
     private static final int PICK_FROM_CAMERA = 2;
@@ -87,6 +93,11 @@ public class WriteActivity extends AppCompatActivity {
             detailNotepadVO = NoteDB.getNotepad(key);
             inputTitle.setText(detailNotepadVO.getTitleStr());
             inputText.setText(detailNotepadVO.getDescription());
+        }
+        else{
+            imageOrder = 0;
+            NotepadNo = NoteDB.getIndexes().size();
+            key = NotepadNo + "번 메모";
         }
     }
 
@@ -151,15 +162,13 @@ public class WriteActivity extends AppCompatActivity {
             }
             case R.id.action_writeComplete: { // actionbar의 작성 완료 눌렀을 때 동작
                 try {
-                    if(key != null){ // 편집시 실행되는 부분
+                    if(detailNotepadVO != null){ // 편집시 실행되는 부분
                         NoteDB.addNotepad(key, new DetailNotepadVO(detailNotepadVO.getNotepadNo(), inputTitle.getText().toString(), inputText.getText().toString()));
                     }
                     else { // 작성시 실행되는 부분
-                        int NotepadNo = NoteDB.getIndexes().size();
-                        key = NotepadNo + "번 메모";
                         NoteDB.addNotepad(key, new DetailNotepadVO(NotepadNo, inputTitle.getText().toString(), inputText.getText().toString()));
                     }
-//                    PathDbCrudUtils.dbInsert(getApplicationContext()); // 추가한 사진들 db 업데이트
+                    ImageDB.save(getFilesDir());
                     NoteDB.save(getFilesDir()); // DB 파일 경로에 저장
                     Toast.makeText(getApplicationContext(), "작성 완료", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
@@ -181,6 +190,10 @@ public class WriteActivity extends AppCompatActivity {
 
         try {
             tempFile = createImageFile();
+            // @@@@@@@@@@@@@@@@@@@@@ 카메라 통해 사진 추가(context, imagePath, imgKind, memoKey)
+            ImageDB.addImage(key + imageOrder, new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
+            imageOrder++;
+            System.out.println(tempFile.getAbsolutePath());
         } catch (IOException e) {
             Toast.makeText(getApplicationContext(), "이미지 처리 오류! 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
             finish();
@@ -267,7 +280,8 @@ public class WriteActivity extends AppCompatActivity {
             //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
 
             // @@@@@@@@@@@@@@@@@@@@@ Url 통해 사진 추가(context, imagePath, imgKind, memoKey)
-//            PathDbCrudUtils.addColumn(baseImageURL, 2, key);
+            ImageDB.addImage(key + imageOrder, new ImageVO(key, 0, baseImageURL, imageOrder));
+            imageOrder++;
 
             System.out.println(baseImageURL);
 
@@ -331,10 +345,10 @@ public class WriteActivity extends AppCompatActivity {
                 tempFile = new File(cursor.getString(column_index));
                 System.out.println(tempFile.getAbsolutePath());
 
-                // !!!!!!!!!! 앨범에 있는 이미지 불러오면 같은 이미지 다른 메모에서 할 때 imagePath 유니크 키 문제 생김
-                // 앨범에서 불러와도 따로 저장을 하던 유니크 키 설정을 풀던 필요
                 // @@@@@@@@@@@@@@@@@@@@@ 앨범 통해 사진 추가(context, imagePath, imgKind, memoKey)
-//                PathDbCrudUtils.addColumn(tempFile.getAbsolutePath(), 1, key);
+                ImageDB.addImage(key + imageOrder, new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
+                imageOrder++;
+                System.out.println("Write Key: "+key+imageOrder);
             } finally {
                 if (cursor != null) {
                     cursor.close();
@@ -349,12 +363,7 @@ public class WriteActivity extends AppCompatActivity {
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
         ImageView imageView = new AppCompatImageView(this);
 
-        ImageResizeUtils.resizeFile(tempFile, tempFile, resizePicSize, isCamera);
-
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        Bitmap originalBm = BitmapFactory.decodeFile(tempFile.getAbsolutePath(), options);
-
-        imageView.setImageBitmap(originalBm);
+        Glide.with(this).load(tempFile).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
 
         li.addView(imageView);
     }
@@ -364,18 +373,12 @@ public class WriteActivity extends AppCompatActivity {
         String timeStamp = DateFormat.getDateInstance(DateFormat.MEDIUM).format(new Date());
         String imageFileName = timeStamp + "_";
 
-        // 처음 작성시 key에 null 있음!!!!!!!!! 수정필요!!!
         // 이미지가 저장될 폴더 이름 ( 각 index(key) 값 )
         File storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/"+key+"/");
         if (!storageDir.exists()) storageDir.mkdirs();
 
         // 빈 파일 생성
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-
-        // @@@@@@@@@@@@@@@@@@@@@ 카메라 통해 사진 추가(context, imagePath, imgKind, memoKey)
-//        PathDbCrudUtils.addColumn(image.getAbsolutePath(), 0, key);
-
-        System.out.println(image.getAbsolutePath());
 
         Log.d(TAG, "createImageFile : " + image.getAbsolutePath());
 

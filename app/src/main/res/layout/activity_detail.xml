@@ -19,26 +19,32 @@
         android:text="Small Text"
         android:layout_alignParentBottom="true" />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/tvNotepadNumber"
+        android:layout_below="@+id/image_scrollView">
     <TextView
         android:id="@+id/tvDescription"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/tvNotepadNumber"
-        android:layout_below="@+id/image_scrollView"
         android:text="New Text" />
+    </ScrollView>
 
-    <ScrollView
+
+    <HorizontalScrollView
         android:id="@+id/image_scrollView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvTitle">
 
         <LinearLayout
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:id="@+id/detailPicList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
-    </ScrollView>
+    </HorizontalScrollView>
+
 
 </RelativeLayout>
