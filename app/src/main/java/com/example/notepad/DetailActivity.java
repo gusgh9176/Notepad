@@ -4,8 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,7 +16,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.notepad.db.ImageDB;
 import com.example.notepad.db.NoteDB;
-import com.example.notepad.util.BitmapResizeUtils;
 import com.example.notepad.vo.DetailNotepadVO;
 import com.example.notepad.vo.ImageVO;
 
@@ -55,16 +52,21 @@ public class DetailActivity extends AppCompatActivity {
 
         DetailNotepadVO articleVO = NoteDB.getNotepad(key);
         int imageOrder = 0;
-        ImageVO imageVO = ImageDB.getImage(key+imageOrder);
-        tvTitle.setText(articleVO.getTitleStr());
-        tvNotepadNumber.setText(Integer.toString(articleVO.getNotepadNo()));
-        tvDescription.setText(articleVO.getDescription());
+        ImageVO imageVO = ImageDB.getImage(key + imageOrder);
+        String title = articleVO.getTitleStr();
+        String notepadNumber = Integer.toString(articleVO.getNotepadNo());
+        String description = articleVO.getDescription();
 
-        while(imageVO != null){
+        tvTitle.setText(title);
+        tvNotepadNumber.setText(notepadNumber);
+        tvDescription.setText(description);
+
+
+        while (imageVO != null) {
 
             setImage(imageVO.getImageUrl());
             imageOrder++;
-            imageVO = ImageDB.getImage(key+imageOrder);
+            imageVO = ImageDB.getImage(key + imageOrder);
         }
 
     }
@@ -81,7 +83,7 @@ public class DetailActivity extends AppCompatActivity {
     // 액션버튼을 클릭했을때의 동작
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home: // actionbar의 back 키 눌렀을 때 동작
                 finish();
                 break;
