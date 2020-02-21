@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -138,7 +139,6 @@ public class WriteActivity extends AppCompatActivity {
                         selUrlInput();
                         break;
                 }
-                Toast.makeText(getApplicationContext(), selectedText, Toast.LENGTH_SHORT).show();
             }
         });
         builder.show();
@@ -236,7 +236,7 @@ public class WriteActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
 //                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
 //                        setUrlImage("https://windowsforum.kr/files/attach/images/48/259/173/007/8c16ab12f4d41c4a6c358f4163888a2e.jpg");
-                        setUrlImage("https://t1.daumcdn.net/cfile/tistory/12630F0B4C5508590C");
+                        setUrlImage("https://windowsforum.kr/");
 //                        setUrlImage(edittext.getText().toString());
                     }
                 });
@@ -264,13 +264,15 @@ public class WriteActivity extends AppCompatActivity {
                     //  아래 코드는 웹에서 이미지를 가져온 뒤
                     //  이미지 뷰에 지정할 Bitmap을 생성하는 과정
 
-                    HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setDoInput(true);
                     conn.connect();
 
                     InputStream is = conn.getInputStream();
                     urlBitmap = BitmapFactory.decodeStream(is);
-                } catch(IOException ex) {
+                }catch (MalformedURLException uex) {
+                    uex.printStackTrace();
+                }catch(IOException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -281,13 +283,18 @@ public class WriteActivity extends AppCompatActivity {
             //  대기해야 하므로 작업스레드의 join() 메소드를 호출해서
             //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
 
+            mThread.join();
+
+            // 잘못된 url 체크
+            if(urlBitmap == null){
+                Toast.makeText(getApplicationContext(), "잘못된 url 주소입니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             // @@@@@@@@@@@@@@@@@@@@@ Url 통해 사진 추가(context, imagePath, imgKind, memoKey)
             ImageDB.addImage(key + imageOrder, new ImageVO(key, 0, baseImageURL, imageOrder));
-            imageOrder++;
-
             System.out.println(baseImageURL);
-
-            mThread.join();
+            imageOrder++;
 
             //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
             //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
@@ -297,9 +304,6 @@ public class WriteActivity extends AppCompatActivity {
             li.addView(imageView);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(),"잘못된 URL 입니다.", Toast.LENGTH_SHORT).show();
         }
     }
 
