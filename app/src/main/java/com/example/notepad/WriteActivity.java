@@ -28,8 +28,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.notepad.db.ImageDB;
 import com.example.notepad.db.NoteDB;
-import com.example.notepad.util.BitmapResizeUtils;
-import com.example.notepad.util.ImageResizeUtils;
 import com.example.notepad.vo.DetailNotepadVO;
 import com.example.notepad.vo.ImageVO;
 
