@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.example.notepad.adapter.ListViewAdapter;
 import com.example.notepad.db.NoteDB;
 import com.example.notepad.vo.ListViewNotepadVO;
-import com.example.notepad.vo.DetailNotepadVO;
 import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
@@ -43,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝 //
 
-
-//        prepareNoteDB(); // 임시 DB 생성
         NoteDB.load(getFilesDir()); // 이전 메모 불러오기
 
         addItemAdapter();
@@ -136,12 +133,6 @@ public class MainActivity extends AppCompatActivity {
             if(delete) {continue;} // 삭제를 한 상태라면 해당 인덱스 작업 스킵
             adapter.addItem(ContextCompat.getDrawable(this, R.drawable.ic_action_camera), index, title, description);
             adapter.notifyDataSetChanged();
-        }
-    }
-
-    private void prepareNoteDB() {
-        for ( int i = 1; i < 100; i++ ){
-            NoteDB.addNotepad(i + "번 메모", new DetailNotepadVO(i, i + "번 메모 제목", i + "번 메모 내용"));
         }
     }
 
