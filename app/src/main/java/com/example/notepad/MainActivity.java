@@ -106,19 +106,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        //or switch문을 이용하면 될듯 하다.
-        if (id == R.id.action_write) {
-            Intent intent = new Intent(MainActivity.this, WriteActivity.class);
-            startActivity(intent);
-
-            Toast.makeText(this, "메모 작성 클릭", Toast.LENGTH_SHORT).show();
-            return true;
+        
+        switch (id){
+            case R.id.action_write:
+                Intent intent = new Intent(MainActivity.this, WriteActivity.class);
+                startActivity(intent);
+                Toast.makeText(this, "메모 작성 클릭", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.action_refresh:
+                addItemAdapter();
+                Toast.makeText(this, "새로 고침", Toast.LENGTH_SHORT).show();
+                break;
         }
-        if (id == R.id.action_refresh) {
-            addItemAdapter();
-            Toast.makeText(this, "새로 고침", Toast.LENGTH_SHORT).show();
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
