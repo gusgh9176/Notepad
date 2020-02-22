@@ -3,6 +3,7 @@ package com.example.notepad;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.FileProvider;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-// 처음 작성시 key에 null 있음!!!!!!!!! 수정필요!!!
 // 편집시 imageOrder 정해줘야함
 public class WriteActivity extends AppCompatActivity {
 
@@ -54,6 +54,9 @@ public class WriteActivity extends AppCompatActivity {
     private DetailNotepadVO detailNotepadVO = null;
     private int imageOrder = 0;
     private int NotepadNo;
+
+    private List<String> imageIndexList = new ArrayList<>();
+    private List<ImageVO> imageVOList = new ArrayList<>();
 
     private static final int PICK_FROM_ALBUM = 1;
     private static final int PICK_FROM_CAMERA = 2;
@@ -87,7 +90,7 @@ public class WriteActivity extends AppCompatActivity {
         // Intent 받아옴
         Intent intent = getIntent();
         // 받아온 Intent에 key 존재 = 기존 것 편집
-        if(intent.hasExtra("key")) {
+        if (intent.hasExtra("key")) {
             key = intent.getStringExtra("key");
             detailNotepadVO = NoteDB.getNotepad(key);
             inputTitle.setText(detailNotepadVO.getTitleStr());
@@ -100,8 +103,7 @@ public class WriteActivity extends AppCompatActivity {
                 imageOrder++;
                 imageVO = ImageDB.getImage(key + imageOrder);
             }
-        }
-        else{
+        } else {
             imageOrder = 0;
             NotepadNo = NoteDB.getIndexes().size();
             key = NotepadNo + "번 메모";
@@ -112,21 +114,20 @@ public class WriteActivity extends AppCompatActivity {
         @Override
         public void onClick(View view) {
             switch (view.getId()) {
-                case R.id.btnInputPic: {
+                case R.id.btnInputPic:
                     selPicInput();
                     break;
-                }
             }
         }
 
     };
-    private void selPicInput()
-    {
+
+    private void selPicInput() {
         final List<String> ListItems = new ArrayList<>();
         ListItems.add("카메라");
         ListItems.add("앨범");
         ListItems.add("URL");
-        final CharSequence[] items =  ListItems.toArray(new String[ ListItems.size()]);
+        final CharSequence[] items = ListItems.toArray(new String[ListItems.size()]);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("추가 방식");
@@ -134,7 +135,7 @@ public class WriteActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int pos) {
                 String selectedText = items[pos].toString();
                 // pos = 0 카메라, pos = 1 앨범, pos = 2 URL
-                switch (pos){
+                switch (pos) {
                     case 0:
                         takePhoto();
                         break;
@@ -161,20 +162,22 @@ public class WriteActivity extends AppCompatActivity {
     // 액션버튼을 클릭했을때의 동작
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home: { // actionbar의 back키 눌렀을 때 동작
                 finish();
                 return true;
             }
             case R.id.action_writeComplete: { // actionbar의 작성 완료 눌렀을 때 동작
                 try {
-                    if(detailNotepadVO != null){ // 편집시 실행되는 부분
+                    if (detailNotepadVO != null) { // 편집시 실행되는 부분
                         NoteDB.addNotepad(key, new DetailNotepadVO(detailNotepadVO.getNotepadNo(), inputTitle.getText().toString(), inputText.getText().toString()));
-                    }
-                    else { // 작성시 실행되는 부분
+                    } else { // 작성시 실행되는 부분
                         NoteDB.addNotepad(key, new DetailNotepadVO(NotepadNo, inputTitle.getText().toString(), inputText.getText().toString()));
                     }
-                    ImageDB.save(getFilesDir());
+                    for(int i=0; i < imageIndexList.size(); i++) {
+                        ImageDB.addImage(imageIndexList.get(i), imageVOList.get(i));
+                    }
+                    ImageDB.save(getFilesDir()); // DB 파일 경로에 저장
                     NoteDB.save(getFilesDir()); // DB 파일 경로에 저장
                     Toast.makeText(getApplicationContext(), "작성 완료", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
@@ -197,7 +200,8 @@ public class WriteActivity extends AppCompatActivity {
         try {
             tempFile = createImageFile();
             // @@@@@@@@@@@@@@@@@@@@@ 카메라 통해 사진 추가(context, imagePath, imgKind, memoKey)
-            ImageDB.addImage(key + imageOrder, new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
+            imageIndexList.add(key+imageOrder);
+            imageVOList.add(new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
             imageOrder++;
             System.out.println(tempFile.getAbsolutePath());
         } catch (IOException e) {
@@ -209,12 +213,12 @@ public class WriteActivity extends AppCompatActivity {
 
             // Android OS 7 이후
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                Uri photoUri = FileProvider.getUriForFile(this, packegeName+".provider", tempFile);
+                Uri photoUri = FileProvider.getUriForFile(this, packegeName + ".provider", tempFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 startActivityForResult(intent, PICK_FROM_CAMERA);
             }
             // 이전
-            else{
+            else {
                 Uri photoUri = Uri.fromFile(tempFile);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
                 startActivityForResult(intent, PICK_FROM_CAMERA);
@@ -230,7 +234,7 @@ public class WriteActivity extends AppCompatActivity {
         startActivityForResult(intent, PICK_FROM_ALBUM);
     }
 
-    private void selUrlInput(){
+    private void selUrlInput() {
         final EditText edittext = new EditText(this);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -248,14 +252,14 @@ public class WriteActivity extends AppCompatActivity {
         builder.setNegativeButton("취소",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(),"취소되었습니다" ,Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "취소되었습니다", Toast.LENGTH_SHORT).show();
                     }
                 });
         builder.show();
     }
 
     // Url로 이미지 추가
-    private void setUrlImage(String baseURL){
+    private void setUrlImage(String baseURL) {
         final String baseImageURL = baseURL;
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
         ImageView imageView = new AppCompatImageView(this);
@@ -275,9 +279,9 @@ public class WriteActivity extends AppCompatActivity {
 
                     InputStream is = conn.getInputStream();
                     urlBitmap = BitmapFactory.decodeStream(is);
-                }catch (MalformedURLException uex) {
+                } catch (MalformedURLException uex) {
                     uex.printStackTrace();
-                }catch(IOException ex) {
+                } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -291,13 +295,14 @@ public class WriteActivity extends AppCompatActivity {
             mThread.join();
 
             // 잘못된 url 체크
-            if(urlBitmap == null){
+            if (urlBitmap == null) {
                 Toast.makeText(getApplicationContext(), "잘못된 url 주소입니다.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // @@@@@@@@@@@@@@@@@@@@@ Url 통해 사진 추가(context, imagePath, imgKind, memoKey)
-            ImageDB.addImage(key + imageOrder, new ImageVO(key, 0, baseImageURL, imageOrder));
+            imageIndexList.add(key+imageOrder);
+            imageVOList.add(new ImageVO(key, 0, baseImageURL, imageOrder));
             imageOrder++;
 
             //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
@@ -317,7 +322,7 @@ public class WriteActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != Activity.RESULT_OK) {
             Toast.makeText(getApplicationContext(), "취소 되었습니다.", Toast.LENGTH_SHORT).show();
-            if(tempFile != null) {
+            if (tempFile != null) {
                 if (tempFile.exists()) {
                     if (tempFile.delete()) {
                         tempFile = null;
@@ -341,7 +346,7 @@ public class WriteActivity extends AppCompatActivity {
                  *  Uri 스키마를
                  *  content:/// 에서 file:/// 로  변경한다.
                  */
-                String[] proj = { MediaStore.Images.Media.DATA };
+                String[] proj = {MediaStore.Images.Media.DATA};
 
                 assert photoUri != null;
                 cursor = getContentResolver().query(photoUri, proj, null, null, null);
@@ -355,9 +360,11 @@ public class WriteActivity extends AppCompatActivity {
                 System.out.println(tempFile.getAbsolutePath());
 
                 // @@@@@@@@@@@@@@@@@@@@@ 앨범 통해 사진 추가(context, imagePath, imgKind, memoKey)
-                ImageDB.addImage(key + imageOrder, new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
+                imageIndexList.add(key+imageOrder);
+                imageVOList.add(new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
+
                 imageOrder++;
-                System.out.println("Write Key: "+key+imageOrder);
+                System.out.println("Write Key: " + key + imageOrder);
             } finally {
                 if (cursor != null) {
                     cursor.close();
@@ -379,9 +386,28 @@ public class WriteActivity extends AppCompatActivity {
 
     private void setImage(String path) {
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
-        ImageView imageView = new AppCompatImageView(this);
+        final ImageView imageView = new AppCompatImageView(this);
 
         Glide.with(this).load(path).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
+
+        imageView.setOnClickListener(
+                new View.OnClickListener() {
+                    private long lastTimePicPressed;
+                    @Override
+                    public void onClick(View v) {
+                        //2초 이내에 이미지 재 클릭 시 앱 종료
+                        if (System.currentTimeMillis() - lastTimePicPressed < 2000)
+                        {
+                            ((LinearLayout)findViewById(R.id.picList)).removeView(v);
+                            return;
+                        }
+                        // 이미지 한번 클릭 시 메시지
+                        Toast.makeText(getApplicationContext(), "'이미지를 한번 더 누르시면 이미지가 삭제됩니다.", Toast.LENGTH_SHORT).show();
+                        //lastTimePicPressed에 이미지가 클릭 된 시간을 기록
+                        lastTimePicPressed = System.currentTimeMillis();
+                    }
+                }
+        );
 
         li.addView(imageView);
     }
@@ -392,7 +418,7 @@ public class WriteActivity extends AppCompatActivity {
         String imageFileName = timeStamp + "_";
 
         // 이미지가 저장될 폴더 이름 ( 각 index(key) 값 )
-        File storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/"+key+"/");
+        File storageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES) + "/" + key + "/");
         if (!storageDir.exists()) storageDir.mkdirs();
 
         // 빈 파일 생성
@@ -402,7 +428,6 @@ public class WriteActivity extends AppCompatActivity {
 
         return image;
     }
-
 
 
 }
