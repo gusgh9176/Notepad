@@ -2,11 +2,11 @@ package com.example.notepad.vo;
 
 import android.graphics.drawable.Drawable;
 
-public class ListViewNotepadVO {
-    private Drawable iconDrawable ;
+public class RecyclerItemVO {
+    private Drawable iconDrawable;
     private String index;
-    private String titleStr ;
-    private String descStr ;
+    private String titleStr;
+    private String descStr;
 
     public Drawable getIconDrawable() {
         return iconDrawable;
