@@ -41,8 +41,6 @@ public class DetailActivity extends AppCompatActivity {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(0xFF339999));
         // 액션바 설정 끝
 
-        ImageDB.load(getFilesDir()); // 이전 이미지 불러오기
-
         tvTitle = (TextView) findViewById(R.id.tvTitle);
         tvNotepadNumber = (TextView) findViewById(R.id.tvNotepadNumber);
         tvDescription = (TextView) findViewById(R.id.tvDescription);
