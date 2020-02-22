@@ -148,9 +148,13 @@ public class MainActivity extends AppCompatActivity {
                 continue;
             }
 
+            // 엔터키 제거
             // maxDescription 값보다 본문이 길면 값만큼 잘라서 보여줌
             if (description.length() > maxDescription) {
-                description = description.substring(0, maxDescription) + "...";
+                description = description.replaceAll("\n","").substring(0, maxDescription) + "...";
+            }
+            else{
+                description = description.replaceAll("\n","");
             }
 
             for(int j=0; j< ImageDB.getIndexes().size(); j++) {
