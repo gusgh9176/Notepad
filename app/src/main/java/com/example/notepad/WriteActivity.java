@@ -52,7 +52,7 @@ public class WriteActivity extends AppCompatActivity {
 
     private String key = null; // 편집 시 키
     private DetailNotepadVO detailNotepadVO = null;
-    private int imageOrder;
+    private int imageOrder = 0;
     private int NotepadNo;
 
     private static final int PICK_FROM_ALBUM = 1;
@@ -92,6 +92,14 @@ public class WriteActivity extends AppCompatActivity {
             detailNotepadVO = NoteDB.getNotepad(key);
             inputTitle.setText(detailNotepadVO.getTitleStr());
             inputText.setText(detailNotepadVO.getDescription());
+
+            ImageVO imageVO = ImageDB.getImage(key + imageOrder);
+
+            while (imageVO != null) {
+                setImage(imageVO.getImageUrl());
+                imageOrder++;
+                imageVO = ImageDB.getImage(key + imageOrder);
+            }
         }
         else{
             imageOrder = 0;
@@ -365,6 +373,15 @@ public class WriteActivity extends AppCompatActivity {
         ImageView imageView = new AppCompatImageView(this);
 
         Glide.with(this).load(tempFile).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
+
+        li.addView(imageView);
+    }
+
+    private void setImage(String path) {
+        LinearLayout li = (LinearLayout) findViewById(R.id.picList);
+        ImageView imageView = new AppCompatImageView(this);
+
+        Glide.with(this).load(path).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
 
         li.addView(imageView);
     }
