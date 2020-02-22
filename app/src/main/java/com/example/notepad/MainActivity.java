@@ -27,7 +27,9 @@ import com.gun0912.tedpermission.PermissionListener;
 import com.gun0912.tedpermission.TedPermission;
 
 import java.util.ArrayList;
+import java.util.List;
 
+// 이미지 로딩 늦는 이슈 해결해야
 public class MainActivity extends AppCompatActivity {
 
     ListView listview;
@@ -168,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView setImage(String path) {
         ImageView imageView = new AppCompatImageView(this);
         Glide.with(this).load(path).override(320, 320).centerCrop().into(imageView);
+        imageView.invalidate();
         return imageView;
     }
 }
