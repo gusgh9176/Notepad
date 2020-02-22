@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         // Adapter 생성
         adapter = new ListViewAdapter();
         // Drawable 생성
-        Drawable drawable;
+        Drawable drawable = null;
         // 리스트뷰 참조 및 Adapter달기
         listview = (ListView) findViewById(R.id.listview1);
         listview.setAdapter(adapter);
@@ -153,14 +153,16 @@ public class MainActivity extends AppCompatActivity {
                 description = description.substring(0, maxDescription) + "...";
             }
 
-            ImageVO imageVO = ImageDB.getImage(index + 0);
-
-            if (imageVO != null) {
-                ImageView imageView = setImage(imageVO.getImageUrl());
-                drawable = imageView.getDrawable();
-            }
-            else{
-                drawable = ContextCompat.getDrawable(this, R.drawable.ic_action_camera);
+            for(int j=0; j< ImageDB.getIndexes().size(); j++) {
+                ImageVO imageVO = ImageDB.getImage(index + j);
+                if (imageVO != null && !imageVO.isDelete()) {
+                    ImageView imageView = setImage(imageVO.getImageUrl());
+                    drawable = imageView.getDrawable();
+                    break;
+                }
+                else{
+                    drawable = ContextCompat.getDrawable(this, R.drawable.ic_action_camera);
+                }
             }
             adapter.addItem(drawable, index, title, description);
         }

@@ -7,6 +7,7 @@ public class ImageVO implements Serializable {
     private int imageKind;
     private String imageUrl;
     private int order;
+    private boolean delete = false;
 
     public ImageVO(String memoKey, int imageKind, String imageUrl, int order) {
         this.memoKey = memoKey;
@@ -45,5 +46,13 @@ public class ImageVO implements Serializable {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public boolean isDelete() {
+        return delete;
+    }
+
+    public void setDelete(boolean delete) {
+        this.delete = delete;
     }
 }

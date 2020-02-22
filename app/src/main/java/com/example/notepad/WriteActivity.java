@@ -97,9 +97,11 @@ public class WriteActivity extends AppCompatActivity {
             inputText.setText(detailNotepadVO.getDescription());
 
             ImageVO imageVO = ImageDB.getImage(key + imageOrder);
-
+            System.out.println(key + imageOrder);
             while (imageVO != null) {
-                setImage(imageVO.getImageUrl());
+                if(!imageVO.isDelete()) {
+                    setImage(imageVO.getImageUrl());
+                }
                 imageOrder++;
                 imageVO = ImageDB.getImage(key + imageOrder);
             }
@@ -387,6 +389,7 @@ public class WriteActivity extends AppCompatActivity {
     private void setImage(String path) {
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
         final ImageView imageView = new AppCompatImageView(this);
+        imageView.setId(imageOrder);
 
         Glide.with(this).load(path).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
 
@@ -398,6 +401,8 @@ public class WriteActivity extends AppCompatActivity {
                         //2초 이내에 이미지 재 클릭 시 앱 종료
                         if (System.currentTimeMillis() - lastTimePicPressed < 2000)
                         {
+                            System.out.println(key + imageView.getId());
+                            ImageDB.getImage(key + imageView.getId()).setDelete(true);
                             ((LinearLayout)findViewById(R.id.picList)).removeView(v);
                             return;
                         }

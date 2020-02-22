@@ -61,8 +61,9 @@ public class DetailActivity extends AppCompatActivity {
 
 
         while (imageVO != null) {
-
-            setImage(imageVO.getImageUrl());
+            if(!imageVO.isDelete()) { // 존재함
+                setImage(imageVO.getImageUrl());
+            }
             imageOrder++;
             imageVO = ImageDB.getImage(key + imageOrder);
         }
