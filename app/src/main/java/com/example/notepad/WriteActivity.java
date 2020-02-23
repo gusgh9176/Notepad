@@ -43,29 +43,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-// 편집시 imageOrder 정해줘야함
 public class WriteActivity extends AppCompatActivity {
 
-    EditText inputTitle, inputText;
-    Button btnInputPic;
-    Bitmap urlBitmap;
+    // 화면에 정적인 view
+    EditText inputTitle, inputText; // 제목, 본문 입력부분
+    Button btnInputPic; // 이미지 추가 버튼
 
-    private String key = null; // 편집 시 키
-    private DetailNotepadVO detailNotepadVO = null;
-    private int imageOrder = 0;
-    private int NotepadNo;
+    Bitmap urlBitmap; // 잘못된 이미지 추가 했는지 판단용 변수
 
-    private List<String> imageIndexList = new ArrayList<>();
-    private List<ImageVO> imageVOList = new ArrayList<>();
+    private String key = null; // 편집을 통해 WirteActivity를 실행시켰을 때 DetailActivity로 부터 받아오는 key
+    private DetailNotepadVO detailNotepadVO = null; // 편집을 통해 WirteActivity를 실행시켰을 때 기존 내용 담아줄 변수
+    private File tempFile; // 새로 카메라를 통해 찍은 이미지, 앨범을 통해 선택한 이미지, URL을 통해 불러온 이미지를 담고 있을 변수
+    private int imageOrder = 0; // 이미지가 현재 몇번째 이미지인지
+    private int NotepadNo; // 현재 몇번 째 메모인지
 
-    private static final int PICK_FROM_ALBUM = 1;
-    private static final int PICK_FROM_CAMERA = 2;
-    private static final String TAG = "WriteActivity";
-    private static final int resizePicSize = 320;
+    // NoteDB와 달리 이미지 저장 방식이 여러개이므로 List 배열을 따로 작성함
+    private List<String> imageIndexList = new ArrayList<>(); // 최종 저장 전 추가한 이미지 index 저장
+    private List<ImageVO> imageVOList = new ArrayList<>(); // 최종 저장 전 추가한 이미지 정보 저장
 
-    private File tempFile;
-    private String packegeName = "com.example.notepad";
-    boolean isCamera = false;
+    private static final int PICK_FROM_CAMERA = 1; // 카메라 작업 후 onActivityResult 메소드에서 카메라 코드 실행 되게 함
+    private static final int PICK_FROM_ALBUM = 2; // 앨범 작업 후 onActivityResult 메소드에서 앨범 코드 실행 되게 함
+    private static final int resizePicSize = 320; // 추가한 이미지 미리보기 크기
+
+    private final String packegeName = "com.example.notepad"; // FileProvider.getUriForFile 메소드에서 필요한 현재 패키지 이름
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,33 +85,36 @@ public class WriteActivity extends AppCompatActivity {
         inputTitle = (EditText) findViewById(R.id.inputTitle);
         inputText = (EditText) findViewById(R.id.inputText);
 
+        // 이미지 추가 버튼에 Listener 달아줌
         btnInputPic.setOnClickListener(listener);
 
         // Intent 받아옴
         Intent intent = getIntent();
-        // 받아온 Intent에 key 존재 = 기존 것 편집
-        if (intent.hasExtra("key")) {
+        // WriteActivity에 편집으로 실행시켰는지, 작성으로 실행시켰는지 판단
+        if (intent.hasExtra("key")) { // 받아온 Intent에 key 존재 = 기존 것 편집
             key = intent.getStringExtra("key");
+            ImageVO imageVO = ImageDB.getImage(key + imageOrder);
             detailNotepadVO = NoteDB.getNotepad(key);
             inputTitle.setText(detailNotepadVO.getTitleStr());
             inputText.setText(detailNotepadVO.getDescription());
 
-            ImageVO imageVO = ImageDB.getImage(key + imageOrder);
-            System.out.println(key + imageOrder);
+            // DetailActivity의 이미지 불러오는 부분과 비슷한 부분
+            // setImage 메소드 내부에서 사용하는 resizePicSize 값이 다름
             while (imageVO != null) {
                 if(!imageVO.isDelete()) {
-                    setImage(imageVO.getImageUrl());
+                    setExistingImage(imageVO.getImageUrl());
                 }
                 imageOrder++;
                 imageVO = ImageDB.getImage(key + imageOrder);
             }
-        } else {
+        } else { // 작성으로 실행했을 때
             imageOrder = 0;
             NotepadNo = NoteDB.getIndexes().size();
             key = NotepadNo + "번 메모";
         }
     }
 
+    // 화면에 정적으로 존재하는 view의 Listener 설정 부분
     View.OnClickListener listener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -123,36 +126,6 @@ public class WriteActivity extends AppCompatActivity {
         }
 
     };
-
-    private void selPicInput() {
-        final List<String> ListItems = new ArrayList<>();
-        ListItems.add("카메라");
-        ListItems.add("앨범");
-        ListItems.add("URL");
-        final CharSequence[] items = ListItems.toArray(new String[ListItems.size()]);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("추가 방식");
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int pos) {
-                String selectedText = items[pos].toString();
-                // pos = 0 카메라, pos = 1 앨범, pos = 2 URL
-                switch (pos) {
-                    case 0:
-                        takePhoto();
-                        break;
-                    case 1:
-                        goToAlbum();
-                        break;
-                    case 2:
-                        selUrlInput();
-                        break;
-                }
-            }
-        });
-        builder.show();
-    }
-
 
     // 액션버튼 메뉴 액션바에 집어 넣기
     @Override
@@ -171,20 +144,22 @@ public class WriteActivity extends AppCompatActivity {
             }
             case R.id.action_writeComplete: { // actionbar의 작성 완료 눌렀을 때 동작
                 try {
-                    if (detailNotepadVO != null) { // 편집시 실행되는 부분
+                    if (detailNotepadVO != null) { // 편집시 실행되는 부분, key가 기존의 불러온 key와 동일
                         NoteDB.addNotepad(key, new DetailNotepadVO(detailNotepadVO.getNotepadNo(), inputTitle.getText().toString(), inputText.getText().toString()));
-                    } else { // 작성시 실행되는 부분
+                    } else { // 작성시 실행되는 부분, key가 새로 생성된 key임
                         NoteDB.addNotepad(key, new DetailNotepadVO(NotepadNo, inputTitle.getText().toString(), inputText.getText().toString()));
                     }
+                    // 앞서 3가지 방식으로 추가 했던 이미지 DB에 저장
                     for(int i=0; i < imageIndexList.size(); i++) {
                         ImageDB.addImage(imageIndexList.get(i), imageVOList.get(i));
                     }
-                    ImageDB.save(getFilesDir()); // DB 파일 경로에 저장
-                    NoteDB.save(getFilesDir()); // DB 파일 경로에 저장
+                    // NoteDB, ImageDB 업데이트한 내용 로컬에 저장
+                    NoteDB.save(getFilesDir());
+                    ImageDB.save(getFilesDir());
                     Toast.makeText(getApplicationContext(), "작성 완료", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                } finally {
+                } finally { // 작업 완료시 WriteActivity 종료
                     finish();
                 }
                 break;
@@ -193,135 +168,12 @@ public class WriteActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void takePhoto() {
-
-        isCamera = true;
-
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        try {
-            tempFile = createImageFile();
-            // @@@@@@@@@@@@@@@@@@@@@ 카메라 통해 사진 추가(context, imagePath, imgKind, memoKey)
-            imageIndexList.add(key+imageOrder);
-            imageVOList.add(new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
-            imageOrder++;
-            System.out.println(tempFile.getAbsolutePath());
-        } catch (IOException e) {
-            Toast.makeText(getApplicationContext(), "이미지 처리 오류! 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-            finish();
-            e.printStackTrace();
-        }
-        if (tempFile != null) {
-
-            // Android OS 7 이후
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                Uri photoUri = FileProvider.getUriForFile(this, packegeName + ".provider", tempFile);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                startActivityForResult(intent, PICK_FROM_CAMERA);
-            }
-            // 이전
-            else {
-                Uri photoUri = Uri.fromFile(tempFile);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-                startActivityForResult(intent, PICK_FROM_CAMERA);
-            }
-        }
-    }
-
-    private void goToAlbum() {
-        isCamera = false;
-
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
-        startActivityForResult(intent, PICK_FROM_ALBUM);
-    }
-
-    private void selUrlInput() {
-        final EditText edittext = new EditText(this);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("URL");
-        builder.setMessage("원하는 이미지 URL을 입력해주세요");
-        builder.setView(edittext);
-        builder.setPositiveButton("입력",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        setUrlImage("https://pbs.twimg.com/media/ERESihnU8AAptEW?format=jpg&name=small");
-//                        setUrlImage("https://windowsforum.kr/files/attach/images/48/259/173/007/8c16ab12f4d41c4a6c358f4163888a2e.jpg");
-//                        setUrlImage(edittext.getText().toString());
-                    }
-                });
-        builder.setNegativeButton("취소",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getApplicationContext(), "취소되었습니다", Toast.LENGTH_SHORT).show();
-                    }
-                });
-        builder.show();
-    }
-
-    // Url로 이미지 추가
-    private void setUrlImage(String baseURL) {
-        final String baseImageURL = baseURL;
-        LinearLayout li = (LinearLayout) findViewById(R.id.picList);
-        ImageView imageView = new AppCompatImageView(this);
-
-        Thread mThread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    URL url = new URL(baseImageURL); // URL 주소를 이용해서 URL 객체 생성
-
-                    //  아래 코드는 웹에서 이미지를 가져온 뒤
-                    //  이미지 뷰에 지정할 Bitmap을 생성하는 과정
-
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setDoInput(true);
-                    conn.connect();
-
-                    InputStream is = conn.getInputStream();
-                    urlBitmap = BitmapFactory.decodeStream(is);
-                } catch (MalformedURLException uex) {
-                    uex.printStackTrace();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        };
-        mThread.start(); // 웹에서 이미지를 가져오는 작업 스레드 실행.
-        try {
-            //  메인 스레드는 작업 스레드가 이미지 작업을 가져올 때까지
-            //  대기해야 하므로 작업스레드의 join() 메소드를 호출해서
-            //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
-
-            mThread.join();
-
-            // 잘못된 url 체크
-            if (urlBitmap == null) {
-                Toast.makeText(getApplicationContext(), "잘못된 url 주소입니다.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // @@@@@@@@@@@@@@@@@@@@@ Url 통해 사진 추가(context, imagePath, imgKind, memoKey)
-            imageIndexList.add(key+imageOrder);
-            imageVOList.add(new ImageVO(key, 0, baseImageURL, imageOrder));
-            imageOrder++;
-
-            //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
-            //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
-
-            Glide.with(this).load(urlBitmap).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
-
-            li.addView(imageView);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     // 카메라 실행 후, 앨범 사진 선택 후 실행되는 메소드
+    // URL 추가 방식은 다른 앱을 실행시켜서 한 것이 아니기 때문에 메소드에 없음
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // 카메라 or 앨범 선택 후 이미지 추가 도중 취소
         if (resultCode != Activity.RESULT_OK) {
             Toast.makeText(getApplicationContext(), "취소 되었습니다.", Toast.LENGTH_SHORT).show();
             if (tempFile != null) {
@@ -359,14 +211,11 @@ public class WriteActivity extends AppCompatActivity {
                 cursor.moveToFirst();
 
                 tempFile = new File(cursor.getString(column_index));
-                System.out.println(tempFile.getAbsolutePath());
 
-                // @@@@@@@@@@@@@@@@@@@@@ 앨범 통해 사진 추가(context, imagePath, imgKind, memoKey)
                 imageIndexList.add(key+imageOrder);
                 imageVOList.add(new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
 
                 imageOrder++;
-                System.out.println("Write Key: " + key + imageOrder);
             } finally {
                 if (cursor != null) {
                     cursor.close();
@@ -376,17 +225,175 @@ public class WriteActivity extends AppCompatActivity {
         }
     }
 
+    // 이미지 추가 버튼 클릭시 AlertDialog 띄워 실행 되는 메소드 선택하게 함
+    private void selPicInput() {
+        final List<String> ListItems = new ArrayList<>();
+        ListItems.add("카메라");
+        ListItems.add("앨범");
+        ListItems.add("URL");
+        final CharSequence[] items = ListItems.toArray(new String[ListItems.size()]);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("추가 방식");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int pos) {
+                String selectedText = items[pos].toString();
+                // pos = 0 카메라, pos = 1 앨범, pos = 2 URL
+                switch (pos) {
+                    case 0:
+                        takePhoto();
+                        break;
+                    case 1:
+                        goToAlbum();
+                        break;
+                    case 2:
+                        selUrlInput();
+                        break;
+                }
+            }
+        });
+        builder.show();
+    }
+
+    // 카메라 앱을 통해 이미지 추가
+    private void takePhoto() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        try {
+            tempFile = createImageFile(); // 카메라로 찍어서 저장되는 이미지의 파일 생성
+            imageIndexList.add(key+imageOrder);
+            imageVOList.add(new ImageVO(key, 0, tempFile.getAbsolutePath(), imageOrder));
+            imageOrder++;
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "이미지 처리 오류! 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+            finish();
+            e.printStackTrace();
+        }
+        if (tempFile != null) {
+            // Android OS 7 이후부터는 Uri를 통한 접근 안되서 두가지 방식으로 나누어둠
+            // Android OS 7 이후
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                Uri photoUri = FileProvider.getUriForFile(this, packegeName + ".provider", tempFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(intent, PICK_FROM_CAMERA);
+            }
+            // 이전
+            else {
+                Uri photoUri = Uri.fromFile(tempFile);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                startActivityForResult(intent, PICK_FROM_CAMERA);
+            }
+            // onActivityResult 메소드 실행됨
+        }
+    }
+
+    // 앨범을 통해 이미지 추가
+    private void goToAlbum() {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+        intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+        startActivityForResult(intent, PICK_FROM_ALBUM);
+        // onActivityResult 메소드 실행됨
+    }
+
+    // URL을 통해 이미지 추가
+    // AlertDialog 통해 사용자로부터 URL 입력 받음
+    private void selUrlInput() {
+        final EditText edittext = new EditText(this);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("URL");
+        builder.setMessage("원하는 이미지 URL을 입력해주세요");
+        builder.setView(edittext);
+        builder.setPositiveButton("입력",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        setUrlImage(edittext.getText().toString()); // 입력 받은 URL로 이미지 받아오는 메소드 실행
+                    }
+                });
+        builder.setNegativeButton("취소",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getApplicationContext(), "취소되었습니다", Toast.LENGTH_SHORT).show();
+                    }
+                });
+        builder.show();
+    }
+
+    // 사용자로부터 입력 받은 URL 통해 이미지 받아오는 메소드
+    private void setUrlImage(String baseURL) {
+        final String baseImageURL = baseURL; // 입력 받은 URL
+        LinearLayout li = (LinearLayout) findViewById(R.id.picList);
+        ImageView imageView = new AppCompatImageView(this);
+
+        Thread mThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(baseImageURL); // URL 주소를 이용해서 URL 객체 생성
+
+                    //  아래 코드는 웹에서 이미지를 가져온 뒤
+                    //  이미지 뷰에 지정할 Bitmap을 생성하는 과정
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setDoInput(true);
+                    conn.connect();
+
+                    InputStream is = conn.getInputStream();
+                    urlBitmap = BitmapFactory.decodeStream(is); // Bitmap 객체로 이미지 저장
+                } catch (MalformedURLException uex) {
+                    uex.printStackTrace();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+        mThread.start(); // 웹에서 이미지를 가져오는 작업 스레드 실행.
+        try {
+            //  메인 스레드는 작업 스레드가 이미지 작업을 가져올 때까지
+            //  대기해야 하므로 작업스레드의 join() 메소드를 호출해서
+            //  메인 스레드가 작업 스레드가 종료될 까지 기다리도록 합니다.
+
+            mThread.join();
+
+            // 잘못된 url 체크
+            if (urlBitmap == null) {
+                Toast.makeText(getApplicationContext(), "잘못된 url 주소입니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            imageIndexList.add(key+imageOrder);
+            imageVOList.add(new ImageVO(key, 0, baseImageURL, imageOrder));
+            imageOrder++;
+
+            //  이제 작업 스레드에서 이미지를 불러오는 작업을 완료했기에
+            //  UI 작업을 할 수 있는 메인스레드에서 이미지뷰에 이미지를 지정합니다.
+
+            Glide.with(this).load(urlBitmap).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
+
+            li.addView(imageView);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    // 새로 이미지 추가할 때
+    // tempFile에 저장되어 있는 이미지 imageView에 저장
     private void setImage() {
 
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
-        ImageView imageView = new AppCompatImageView(this);
+        final ImageView imageView = new AppCompatImageView(this);
 
         Glide.with(this).load(tempFile).override(resizePicSize, resizePicSize).centerCrop().into(imageView);
 
         li.addView(imageView);
     }
 
-    private void setImage(String path) {
+    // 편집 시 기존 이미지 불러올 때
+    // path(이미지 경로)를 통해 이미지 iamgeView에 저장
+    // 편집 시에는 기존 이미지를 삭제할 수 있음
+    private void setExistingImage(String path) {
         LinearLayout li = (LinearLayout) findViewById(R.id.picList);
         final ImageView imageView = new AppCompatImageView(this);
         imageView.setId(imageOrder);
@@ -398,10 +405,9 @@ public class WriteActivity extends AppCompatActivity {
                     private long lastTimePicPressed;
                     @Override
                     public void onClick(View v) {
-                        //2초 이내에 이미지 재 클릭 시 앱 종료
+                        //2초 이내에 이미지 재 클릭 시 이미지 삭제
                         if (System.currentTimeMillis() - lastTimePicPressed < 2000)
                         {
-                            System.out.println(key + imageView.getId());
                             ImageDB.getImage(key + imageView.getId()).setDelete(true);
                             ((LinearLayout)findViewById(R.id.picList)).removeView(v);
                             return;
@@ -417,6 +423,7 @@ public class WriteActivity extends AppCompatActivity {
         li.addView(imageView);
     }
 
+    // 카메라 앱을 통해 새로운 이미지를 만들었을 때 해당 이미지 저장하는 메소드
     private File createImageFile() throws IOException {
         // 이미지 파일 이름 ( _{시간}_ )
         String timeStamp = DateFormat.getDateInstance(DateFormat.MEDIUM).format(new Date());
@@ -428,8 +435,6 @@ public class WriteActivity extends AppCompatActivity {
 
         // 빈 파일 생성
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-
-        Log.d(TAG, "createImageFile : " + image.getAbsolutePath());
 
         return image;
     }
