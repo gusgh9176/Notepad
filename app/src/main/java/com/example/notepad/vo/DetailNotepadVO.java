@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class DetailNotepadVO implements Serializable {
     private int notepadNo;
-    private String titleStr;
-    private String description;
-    private boolean delete = false;
+    private String titleStr; // 제목
+    private String description; // 본문
+    private boolean delete = false; // 삭제 되었는지
 
     public DetailNotepadVO(int notepadNo, String titleStr, String description) {
         this.notepadNo = notepadNo;

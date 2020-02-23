@@ -3,10 +3,10 @@ package com.example.notepad.vo;
 import android.graphics.drawable.Drawable;
 
 public class ListViewNotepadVO {
-    private Drawable iconDrawable ;
-    private String index;
-    private String titleStr ;
-    private String descStr ;
+    private Drawable iconDrawable ; // 미리보기 아이콘
+    private String index; // 메모의 인덱스
+    private String titleStr ; // 제목
+    private String descStr ; // 본문의 일부분
 
     public Drawable getIconDrawable() {
         return iconDrawable;
