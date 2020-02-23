@@ -16,17 +16,20 @@ import java.util.Map;
 
 public class NoteDB {
 
-    private static Map<String, DetailNotepadVO> db = new LinkedHashMap<String, DetailNotepadVO>();
+    private static Map<String, DetailNotepadVO> db = new LinkedHashMap<String, DetailNotepadVO>(); // 키, 오브젝트 저장
     private static File file;
 
+    // 오브젝트 추가
     public static void addNotepad(String index, DetailNotepadVO DetailNotepadVO){
         db.put(index, DetailNotepadVO);
     }
 
+    // DetailNotepadVO 객체 반환
     public static DetailNotepadVO getNotepad(String index){
         return db.get(index);
     }
 
+    // index들 얻음
     public static List<String> getIndexes(){
         Iterator<String> keys = db.keySet().iterator();
 
@@ -39,6 +42,7 @@ public class NoteDB {
         return keyList;
     }
 
+    // 업데이트 한 db 변수 로컬에 저장
     public static void save(File dir){
         ObjectOutputStream oos = null;
         try {
@@ -52,6 +56,7 @@ public class NoteDB {
         }
     }
 
+    // 로컬에 저장했던 db 불러오기
     public static void load(File dir){
         ObjectInputStream ois = null;
         try {

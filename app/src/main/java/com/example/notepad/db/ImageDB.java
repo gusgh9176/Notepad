@@ -15,17 +15,20 @@ import java.util.List;
 import java.util.Map;
 
 public class ImageDB {
-    private static Map<String, ImageVO> db = new LinkedHashMap<String, ImageVO>();
+    private static Map<String, ImageVO> db = new LinkedHashMap<String, ImageVO>(); // 키, 오브젝트 저장
     private static File file;
 
+    // 오브젝트 추가
     public static void addImage(String index, ImageVO DetailNotepadVO){
         db.put(index, DetailNotepadVO);
     }
 
+    // ImageVO 객체 반환
     public static ImageVO getImage(String index){
         return db.get(index);
     }
 
+    // index들 얻음
     public static List<String> getIndexes(){
         Iterator<String> keys = db.keySet().iterator();
 
@@ -38,6 +41,7 @@ public class ImageDB {
         return keyList;
     }
 
+    // 업데이트 한 db 변수 로컬에 저장
     public static void save(File dir){
         ObjectOutputStream oos = null;
         try {
@@ -51,6 +55,7 @@ public class ImageDB {
         }
     }
 
+    // 로컬에 저장했던 db 불러오기
     public static void load(File dir){
         ObjectInputStream ois = null;
         try {
