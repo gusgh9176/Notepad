@@ -19,9 +19,7 @@ public class ListViewAdapter extends BaseAdapter {
     private ArrayList<ListViewNotepadVO> listViewItemList = new ArrayList<ListViewNotepadVO>() ;
 
     // ListViewAdapter의 생성자
-    public ListViewAdapter() {
-
-    }
+    public ListViewAdapter() { }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
     @Override
