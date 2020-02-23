@@ -78,7 +78,7 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    // 이미지를 표시하는 레이아웃에 임시 imageView 객체 만들어서 Glide 함수 통하여 이미지뷰를 추가해줌
+    // 이미지를 표시하는 레이아웃에 임시 imageView 객체 만들어서 Glide 메소드 통하여 이미지뷰를 추가해줌
     private void setImage(String path) {
         LinearLayout li = (LinearLayout) findViewById(R.id.detailPicList);
         ImageView imageView = new AppCompatImageView(this);

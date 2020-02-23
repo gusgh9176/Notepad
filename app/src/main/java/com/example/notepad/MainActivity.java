@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
         addItemAdapter(); // DB.load 통해서 불러온 DB 데이터 adapter 통해 화면에 출력
 
-        // addItemAdapter() 함수 내부에서 생성한 listview에 클릭 이벤트 핸들러 정의.
+        // addItemAdapter() 메소드 내부에서 생성한 listview에 클릭 이벤트 핸들러 정의.
         // 메모 클릭시 key를 담아서 DetailActivity 실행시켜 자세한 내용 볼 수 있게 해줌
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "메모 작성 클릭", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_refresh: // actionbar의 refresh 키 눌렀을 때 동작
-                // addItemAdapter() 함수 통해 adapter와 listview를 재 생성 시켜줌
+                // addItemAdapter() 메소드 통해 adapter와 listview를 재 생성 시켜줌
                 addItemAdapter();
                 Toast.makeText(this, "새로 고침", Toast.LENGTH_SHORT).show();
                 break;
