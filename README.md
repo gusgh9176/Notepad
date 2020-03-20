@@ -48,7 +48,7 @@ Click 작성 완료 = Complete Add Memo
 
 ### Detail Activity
 #### Detail Memo
-![DetailImg1](https://github.com/gusgh9176/Notepad/blob/master/readmeImg/MainActivity2.png?raw=true)
+![DetailImg1](https://github.com/gusgh9176/Notepad/blob/master/readmeImg/DetailActivity.png?raw=true)
 Click pencil Icon = Edit Memo
 
 Click X Icon = Delete Memo
