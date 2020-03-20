@@ -13,7 +13,7 @@ NotePad Andorid App
 - stars
 - release version
 
-![Plat Form](https://img.shields.io/badge/Platform-Andorid-lightgrey)
+![Plat Form](https://img.shields.io/badge/Platform-Android-lightgrey)
 [![GitHub issues](https://img.shields.io/github/issues/gusgh9176/Notepad)](https://github.com/gusgh9176/Notepad/issues)
 [![GitHub stars](https://img.shields.io/github/stars/gusgh9176/Notepad)](https://github.com/gusgh9176/Notepad/stargazers)
 [![GitHub release](https://img.shields.io/badge/release-v0.1-green)](https://github.com/gusgh9176/HowWriteReadMe)
